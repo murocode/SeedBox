@@ -1,0 +1,180 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Enums
+enum Ease {
+  EASY
+  NORMAL
+  HARD
+}
+
+enum Distance {
+  NEAR
+  NORMAL
+  FAR
+}
+
+enum PortalEase {
+  EASY
+  HARD
+}
+
+enum ZeroCycleDifficulty {
+  EASY
+  HARD
+}
+
+enum ReportReason {
+  MISINFO
+  SPAM
+  OTHER
+}
+
+enum ModerationAction {
+  WARNING
+  BAN
+  DISMISS
+  REMOVE_SEED
+}
+
+// Models
+model User {
+  username   String   @id
+  createdAt  DateTime @default(now())
+  email      String?  @unique
+  avatarUrl  String?
+  speedrunId String? // Speedrun.com ID for PB sync
+  pbTime     Float? // PB time in seconds
+  pbUpdatedAt DateTime? // when PB was last synced
+  isBanned   Boolean  @default(false)
+  bio        String?
+  youtubeUrl String?
+  xUrl       String?  @map("twitter_url")
+  twitchUrl  String?
+  websiteUrl String?
+
+  // relations
+  seeds          Seed[]
+  likes          Like[]
+  favorites      Favorite[]
+  following      Follow[]        @relation("following")
+  followers      Follow[]        @relation("followers")
+  oauthAccounts  OAuthAccount[]
+  reportsMade    Report[]        @relation("reporter")
+  moderationLogs ModerationLog[] @relation("moderator")
+  reportsReceived Report[]       @relation("targetUser")
+}
+
+model OAuthAccount {
+  id                Int    @id @default(autoincrement())
+  provider          String // e.g. discord, google
+  providerAccountId String
+  userUsername      String
+  user              User   @relation(fields: [userUsername], references: [username])
+
+  @@unique([provider, providerAccountId])
+}
+
+model Seed {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  seedValue String
+  title     String?
+  comment   String?
+
+  // Overworld
+  owEase        Ease?
+  owTypes       String[] // e.g. ["村","ピラミッド"]
+  villageType   String? // 平原/砂漠/サバンナ/雪原/タイガ
+  hasBlacksmith Boolean?
+
+  // Nether
+  netherEase           Ease?
+  fortressDistance     Distance?
+  fortressTypes        String[] // 複数選択: ブリッジ/ステーブル/ハウジング/トレジャー
+  fortressToNetherDist Distance?
+
+  // End
+  portalRoomEase PortalEase?
+  zeroCycle      ZeroCycleDifficulty?
+
+  // metadata
+  authorUsername String
+  author   User @relation(fields: [authorUsername], references: [username])
+
+  likes     Like[]
+  favorites Favorite[]
+  reports   Report[]
+
+  @@index([seedValue])
+  @@index([authorUsername])
+  @@unique([seedValue, authorUsername])
+}
+
+model Like {
+  id        Int      @id @default(autoincrement())
+  userUsername    String
+  seedId    Int
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userUsername], references: [username])
+  seed Seed @relation(fields: [seedId], references: [id])
+
+  @@unique([userUsername, seedId])
+}
+
+model Favorite {
+  id        Int      @id @default(autoincrement())
+  userUsername    String
+  seedId    Int
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userUsername], references: [username])
+  seed Seed @relation(fields: [seedId], references: [id])
+
+  @@unique([userUsername, seedId])
+}
+
+model Follow {
+  id          Int      @id @default(autoincrement())
+  followerUsername  String
+  followingUsername String
+  createdAt   DateTime @default(now())
+
+  follower  User @relation("following", fields: [followerUsername], references: [username])
+  following User @relation("followers", fields: [followingUsername], references: [username])
+
+  @@unique([followerUsername, followingUsername])
+}
+
+model Report {
+  id           Int          @id @default(autoincrement())
+  reporterUsername   String
+  targetSeedId Int?
+  targetUsername String?
+  reason       ReportReason
+  note         String?
+  createdAt    DateTime     @default(now())
+
+  reporter   User  @relation("reporter", fields: [reporterUsername], references: [username])
+  seed       Seed? @relation(fields: [targetSeedId], references: [id])
+  targetUser User? @relation("targetUser", fields: [targetUsername], references: [username])
+}
+
+model ModerationLog {
+  id          Int              @id @default(autoincrement())
+  moderatorUsername String
+  action      ModerationAction
+  targetType  String // "seed" | "user" | "report"
+  targetId    Int?
+  note        String?
+  createdAt   DateTime         @default(now())
+
+  moderator User @relation("moderator", fields: [moderatorUsername], references: [username])
+}

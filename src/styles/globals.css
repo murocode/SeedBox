@@ -1,0 +1,30 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&family=Fira+Code:wght@400;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html, body, #__next {
+  height: 100%;
+}
+
+.container { max-width: 1024px; }
+
+:root{
+  --bg: #0f172a;
+  --muted: #94a3b8;
+  --font-sans: "Zen Kaku Gothic New", "Inter", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --font-mono: "JetBrains Mono", "Fira Code", ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+}
+
+body{
+  background: linear-gradient(180deg,#f8fafc 0%, #f1f5f9 100%);
+  font-family: var(--font-sans);
+}
+
+.btn{ @apply inline-flex items-center justify-center rounded-md px-4 py-2 font-medium }
+.btn-primary{ @apply bg-primary-500 text-white hover:bg-primary-600 }
+.btn-secondary{ @apply bg-slate-100 text-slate-800 hover:bg-slate-200 }
+
+.site-header{ @apply bg-white border-b shadow-sm }
+

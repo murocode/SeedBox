@@ -1,0 +1,140 @@
+"use client"
+
+import React from 'react'
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import CopySeedButton from './CopySeedButton'
+import SeedReactionButtons from './SeedReactionButtons'
+import ReportButton from './ReportButton'
+import {
+  DISTANCE_LABELS,
+  EASE_LABELS,
+  PORTAL_EASE_LABELS,
+  ZERO_CYCLE_LABELS,
+  formatDate
+} from '../lib/seed-domain'
+
+type Author = { id?: number; username?: string | null; avatarUrl?: string | null; speedrunId?: string | null }
+type Seed = {
+  id: number
+  seedValue: string
+  title?: string | null
+  comment?: string | null
+  createdAt?: string | Date
+  author?: Author
+  owEase?: keyof typeof EASE_LABELS | null
+  owTypes?: string[]
+  villageType?: string | null
+  hasBlacksmith?: boolean | null
+  netherEase?: keyof typeof EASE_LABELS | null
+  fortressDistance?: keyof typeof DISTANCE_LABELS | null
+  fortressTypes?: string[]
+  fortressToNetherDist?: keyof typeof DISTANCE_LABELS | null
+  portalRoomEase?: keyof typeof PORTAL_EASE_LABELS | null
+  zeroCycle?: keyof typeof ZERO_CYCLE_LABELS | null
+  _count?: { likes?: number; favorites?: number }
+}
+
+type SeedCardProps = {
+  seed: Seed
+  showAuthor?: boolean
+  initialLiked?: boolean
+  initialFavorited?: boolean
+  actionSlot?: React.ReactNode
+  href?: string
+}
+
+export default function SeedCard({
+  seed,
+  showAuthor = true,
+  initialLiked = false,
+  initialFavorited = false,
+  actionSlot
+  , href
+}: SeedCardProps) {
+  const authorUsername = seed.author?.username || 'anonymous'
+  const resolvedHref = href ?? `/seeds/${authorUsername}/${seed.seedValue}`
+  const router = useRouter()
+
+  function handleKey(e: React.KeyboardEvent) {
+    if (!resolvedHref) return
+    if (e.key === 'Enter' || e.key === ' ') router.push(resolvedHref)
+  }
+
+  return (
+    <article
+      className={`bg-white rounded-xl shadow-lg overflow-hidden border ${resolvedHref ? 'cursor-pointer' : ''}`}
+      onClick={() => router.push(resolvedHref)}
+      role="button"
+      tabIndex={0}
+      onKeyDown={handleKey}
+    >
+      <div className="p-4">
+        <div className="flex flex-col items-start gap-2">
+          {showAuthor && (
+            <div className="flex items-center gap-3">
+              <Link href={`/users/${authorUsername}`} onClick={(e) => e.stopPropagation()} className="w-12 h-12 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 text-white flex items-center justify-center font-semibold text-lg overflow-hidden shrink-0">
+                {seed.author?.avatarUrl ? (
+                  <img src={seed.author.avatarUrl} alt="avatar" className="w-full h-full object-cover" />
+                ) : (
+                  <span>{seed.author?.username?.charAt(0)?.toUpperCase() || 'U'}</span>
+                )}
+              </Link>
+              <div className="flex flex-col">
+                <Link href={`/users/${authorUsername}`} onClick={(e) => e.stopPropagation()} className="text-sm font-medium text-slate-800 hover:text-primary-600">
+                  {seed.author?.username || '匿名'}
+                </Link>
+                <span className="text-xs text-slate-500">投稿日 {formatDate(seed.createdAt)}</span>
+              </div>
+            </div>
+          )}
+          <div className="w-full">
+            <div className="mt-1 space-y-3">
+              <div className="flex items-start justify-between gap-4">
+                <h3 className="text-lg font-semibold text-slate-900 flex-1 min-w-0 truncate">{seed.title || '（タイトル未設定）'}</h3>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2 text-xs font-medium">
+                <CopySeedButton seedValue={seed.seedValue} variant="chip" showLabel={false} />
+              </div>
+            </div>
+            <p className="mt-2 text-sm text-slate-700 line-clamp-3">{seed.comment || '説明なし'}</p>
+
+            <div className="mt-4 flex flex-wrap gap-2 text-xs font-medium text-slate-600">
+              {seed.owEase ? <span className="rounded-full bg-slate-100 px-2 py-1">OW: {EASE_LABELS[seed.owEase]}</span> : null}
+              {seed.netherEase ? <span className="rounded-full bg-slate-100 px-2 py-1">ネザー: {EASE_LABELS[seed.netherEase]}</span> : null}
+              {seed.fortressDistance ? <span className="rounded-full bg-slate-100 px-2 py-1">廃要塞距離: {DISTANCE_LABELS[seed.fortressDistance]}</span> : null}
+              {seed.fortressToNetherDist ? <span className="rounded-full bg-slate-100 px-2 py-1">砦距離: {DISTANCE_LABELS[seed.fortressToNetherDist]}</span> : null}
+              {seed.portalRoomEase ? <span className="rounded-full bg-slate-100 px-2 py-1">ポータル: {PORTAL_EASE_LABELS[seed.portalRoomEase]}</span> : null}
+              {seed.zeroCycle ? <span className="rounded-full bg-slate-100 px-2 py-1">ゼロサイクル: {ZERO_CYCLE_LABELS[seed.zeroCycle]}</span> : null}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="border-t px-4 py-3 text-sm text-slate-600 bg-gradient-to-t from-white/60">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <SeedReactionButtons
+              seedId={seed.id}
+              initialLikeCount={seed._count?.likes ?? 0}
+              initialLiked={initialLiked}
+              initialFavorited={initialFavorited}
+            />
+          </div>
+
+          <div className="flex items-center gap-2">
+            {actionSlot ?? (
+              <ReportButton
+                targetType="seed"
+                targetSeedId={seed.id}
+                targetSeedValue={seed.seedValue}
+                targetAuthorUsername={seed.author?.username ?? undefined}
+              />
+            )}
+          </div>
+        </div>
+      </div>
+    </article>
+  )
+}
