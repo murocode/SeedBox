@@ -63,14 +63,14 @@ export default function SeedCard({
 
   return (
     <article
-      className={`bg-white rounded-xl shadow-lg overflow-hidden border ${resolvedHref ? 'cursor-pointer' : ''}`}
+      className={`min-w-0 max-w-full overflow-hidden rounded-xl border bg-white shadow-lg ${resolvedHref ? 'cursor-pointer' : ''}`}
       onClick={() => router.push(resolvedHref)}
       role="button"
       tabIndex={0}
       onKeyDown={handleKey}
     >
       <div className="p-4">
-        <div className="flex flex-col items-start gap-2">
+        <div className="flex min-w-0 flex-col items-start gap-2">
           {showAuthor && (
             <div className="flex items-center gap-3">
               <Link href={`/users/${authorUsername}`} onClick={(e) => e.stopPropagation()} className="w-12 h-12 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 text-white flex items-center justify-center font-semibold text-lg overflow-hidden shrink-0">
@@ -88,19 +88,19 @@ export default function SeedCard({
               </div>
             </div>
           )}
-          <div className="w-full">
+          <div className="w-full min-w-0">
             <div className="mt-1 space-y-3">
               <div className="flex items-start justify-between gap-4">
-                <h3 className="text-lg font-semibold text-slate-900 flex-1 min-w-0 truncate">{seed.title || '（タイトル未設定）'}</h3>
+                <h3 className="min-w-0 flex-1 break-words text-lg font-semibold text-slate-900">{seed.title || '（タイトル未設定）'}</h3>
               </div>
 
-              <div className="flex flex-wrap items-center gap-2 text-xs font-medium">
+              <div className="flex max-w-full flex-wrap items-center gap-2 text-xs font-medium">
                 <CopySeedButton seedValue={seed.seedValue} variant="chip" showLabel={false} />
               </div>
             </div>
-            <p className="mt-2 text-sm text-slate-700 line-clamp-3">{seed.comment || '説明なし'}</p>
+            <p className="mt-2 break-words text-sm text-slate-700 line-clamp-3">{seed.comment || '説明なし'}</p>
 
-            <div className="mt-4 flex flex-wrap gap-2 text-xs font-medium text-slate-600">
+            <div className="mt-4 flex max-w-full flex-wrap gap-2 text-xs font-medium text-slate-600">
               {seed.owEase ? <span className="rounded-full bg-slate-100 px-2 py-1">OW: {EASE_LABELS[seed.owEase]}</span> : null}
               {seed.netherEase ? <span className="rounded-full bg-slate-100 px-2 py-1">ネザー: {EASE_LABELS[seed.netherEase]}</span> : null}
               {seed.fortressDistance ? <span className="rounded-full bg-slate-100 px-2 py-1">廃要塞距離: {DISTANCE_LABELS[seed.fortressDistance]}</span> : null}
@@ -112,9 +112,9 @@ export default function SeedCard({
         </div>
       </div>
 
-      <div className="border-t px-4 py-3 text-sm text-slate-600 bg-gradient-to-t from-white/60">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
+      <div className="border-t bg-gradient-to-t from-white/60 px-4 py-3 text-sm text-slate-600">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-4 min-w-0">
             <SeedReactionButtons
               seedId={seed.id}
               initialLikeCount={seed._count?.likes ?? 0}
@@ -123,7 +123,7 @@ export default function SeedCard({
             />
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 self-start sm:self-auto">
             {actionSlot ?? (
               <ReportButton
                 targetType="seed"

@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { resolveCurrentUser, hasModerationAccess } from '../lib/auth'
 import AccountMenu from './AccountMenu'
 import SiteNavClient from './SiteNavClient'
+import MobileNav from './MobileNav'
 import PageHeader from './PageHeader'
 
 type NavItem = { href: string; label: string }
@@ -55,20 +56,27 @@ export default async function SiteShell({
               </div>
             </Link>
           </div>
-          <SiteNavClient />
-          {canModerate ? (
-            <a href="/admin" className="ml-4 hover:text-primary-600 transition-colors">管理画面</a>
-          ) : null}
-          <div className="flex items-center gap-3">
+          <div className="hidden md:flex md:items-center md:gap-4">
+            <SiteNavClient />
+          </div>
+
+          <div className="hidden md:flex md:items-center md:gap-3">
+            {canModerate ? (
+              <a href="/admin" className="ml-4 hover:text-primary-600 transition-colors">管理画面</a>
+            ) : null}
             <div className="flex items-center gap-3">
               <a href={postHref} className="rounded-full bg-primary-600 px-3 py-2 text-sm font-medium text-white transition hover:bg-primary-700"><i className="fa-solid fa-plus mr-2" aria-hidden />投稿</a>
               <AccountMenu currentUser={currentUser ? { username: currentUser.username, email: currentUser.email, avatarUrl: currentUser.avatarUrl } : null} />
             </div>
           </div>
+
+          <div className="md:hidden flex items-center gap-2">
+            <MobileNav currentUser={currentUser ? { username: currentUser.username } : null} canModerate={canModerate} postHref={postHref} />
+          </div>
         </div>
       </header>
 
-      <main className="container mx-auto flex-1 px-4 py-8">
+      <main className="container mx-auto flex-1 overflow-x-clip px-4 py-8">
         {layout === 'hero' ? (
           <section className="mb-8 rounded-2xl border bg-gradient-to-br from-white via-white to-primary-50 p-6 shadow-lg md:p-8">
             <div className="md:flex md:items-center md:justify-between md:gap-6">

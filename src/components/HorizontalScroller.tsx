@@ -8,7 +8,7 @@ type Props = {
   className?: string
 }
 
-export default function HorizontalScroller({ items, itemClassName = 'w-[280px] shrink-0 snap-start sm:w-[320px]', className }: Props) {
+export default function HorizontalScroller({ items, itemClassName = 'w-[calc(100vw-5rem)] max-w-[300px] shrink-0 snap-start sm:w-[320px] sm:max-w-none', className }: Props) {
   const scrollRef = useRef<HTMLDivElement | null>(null)
   const [canScrollLeft, setCanScrollLeft] = useState(false)
   const [canScrollRight, setCanScrollRight] = useState(false)
@@ -64,7 +64,7 @@ export default function HorizontalScroller({ items, itemClassName = 'w-[280px] s
 
       <div
         ref={scrollRef}
-        className="flex gap-4 overflow-x-auto scroll-smooth pb-2 pl-12 pr-12 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+        className="flex gap-4 overflow-x-auto scroll-smooth pb-2 pl-4 pr-4 sm:pl-12 sm:pr-12 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
       >
         {items.map((item, index) => (
           <div key={index} className={itemClassName}>

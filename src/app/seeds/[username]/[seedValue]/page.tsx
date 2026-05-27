@@ -86,7 +86,7 @@ export default async function SeedDetailPage({ params }: { params: { username: s
       icon="fa-list-ul"
     >
       <div className="grid gap-6 lg:grid-cols-12 lg:items-start">
-        <section className="space-y-5 lg:col-span-8">
+        <section className="min-w-0 space-y-5 lg:col-span-8">
           <SeedCard
             seed={seed}
             showAuthor={false}
@@ -135,7 +135,7 @@ export default async function SeedDetailPage({ params }: { params: { username: s
           </div>
         </section>
 
-        <aside className="space-y-4 lg:sticky lg:top-28 lg:col-span-4">
+        <aside className="min-w-0 space-y-4 lg:sticky lg:top-28 lg:col-span-4">
           <SeedActionButtons
             seedId={seed.id}
             username={seed.author.username}
