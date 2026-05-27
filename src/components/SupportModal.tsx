@@ -157,7 +157,7 @@ export default function SupportModal({ open, initialCategory = 'CONTACT', target
         onClick={onClose}
       />
 
-      <div className="relative w-full max-w-2xl overflow-hidden rounded-[1.75rem] border border-slate-200 bg-white shadow-2xl">
+      <div className="relative flex max-h-[calc(100vh-2rem)] w-full max-w-2xl flex-col overflow-hidden rounded-[1.75rem] border border-slate-200 bg-white shadow-2xl">
         <div className="border-b border-slate-100 bg-gradient-to-r from-primary-50 via-white to-amber-50 px-6 py-5">
           <div className="flex items-start gap-4">
             <div className="mt-1 flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white text-primary-600 shadow-sm ring-1 ring-primary-100">
@@ -177,7 +177,7 @@ export default function SupportModal({ open, initialCategory = 'CONTACT', target
           </div>
         </div>
 
-        <div className="px-6 py-6">
+        <div className="flex-1 overflow-y-auto px-6 py-6">
           {submitted ? (
             <div className="space-y-4">
               <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-4 text-sm text-emerald-800">
