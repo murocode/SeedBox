@@ -1,10 +1,11 @@
 "use client"
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import Footer from './Footer'
 import AccountMenu from './AccountMenu'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import SiteNavClient from './SiteNavClient'
+import MobileNav from './MobileNav'
 import PageHeader from './PageHeader'
 import { supabase } from '../lib/supabaseClient'
 
@@ -22,7 +23,8 @@ export default function SiteShellClient({
   children,
   rightSlot,
   icon,
-  layout = 'page'
+  layout = 'page',
+  currentUser
 }: {
   title: string
   subtitle?: string
@@ -30,8 +32,61 @@ export default function SiteShellClient({
   rightSlot?: React.ReactNode
   icon?: string
   layout?: 'page' | 'hero'
+  currentUser?: { username: string; email?: string | null; avatarUrl?: string | null } | null
 }) {
   const router = useRouter()
+  const [mobileUser, setMobileUser] = useState(currentUser)
+
+  useEffect(() => {
+    if (currentUser !== undefined) {
+      setMobileUser(currentUser)
+      return
+    }
+
+    let active = true
+
+    async function loadCurrentUser() {
+      try {
+        const { data: sessionData } = await supabase.auth.getSession()
+        const accessToken = sessionData.session?.access_token
+
+        if (!accessToken) {
+          if (active) {
+            setMobileUser(null)
+          }
+          return
+        }
+
+        const response = await fetch('/api/users/me', {
+          headers: {
+            Authorization: `Bearer ${accessToken}`
+          }
+        })
+
+        if (!response.ok) {
+          if (active) {
+            setMobileUser(null)
+          }
+          return
+        }
+
+        const data = await response.json().catch(() => ({}))
+        if (active) {
+          setMobileUser(data.user ?? null)
+        }
+      } catch {
+        if (active) {
+          setMobileUser(null)
+        }
+      }
+    }
+
+    loadCurrentUser()
+
+    return () => {
+      active = false
+    }
+  }, [currentUser])
 
   const handlePostClick = async () => {
     const { data: sessionData } = await supabase.auth.getSession()
@@ -53,12 +108,19 @@ export default function SiteShellClient({
               </div>
             </Link>
           </div>
-          <SiteNavClient />
-          <div className="flex items-center gap-3">
+          <div className="hidden md:flex md:items-center md:gap-4">
+            <SiteNavClient />
+          </div>
+
+          <div className="hidden md:flex md:items-center md:gap-3">
             <div className="flex items-center gap-3">
               <button type="button" onClick={handlePostClick} className="rounded-full bg-primary-600 px-3 py-2 text-sm font-medium text-white transition hover:bg-primary-700"><i className="fa-solid fa-plus mr-2" aria-hidden />投稿</button>
-              <AccountMenu loadCurrentUser />
+              <AccountMenu currentUser={currentUser} loadCurrentUser={currentUser === undefined} />
             </div>
+          </div>
+
+          <div className="md:hidden flex items-center gap-2">
+            <MobileNav currentUser={mobileUser ? { username: mobileUser.username } : null} postHref={mobileUser ? '/seeds/new' : '/login'} />
           </div>
         </div>
       </header>

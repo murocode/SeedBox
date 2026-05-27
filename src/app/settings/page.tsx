@@ -466,7 +466,15 @@ export default function SettingsPage() {
   }
 
   return (
-    <SiteShellClient title="プロフィール設定" subtitle={`@${user.username} のプロフィール情報を編集します`} icon="fa-gear">
+    <SiteShellClient
+      title="プロフィール設定"
+      subtitle={`@${user.username} のプロフィール情報を編集します`}
+      icon="fa-gear"
+      currentUser={{
+        username: user.username,
+        email: user.email
+      }}
+    >
       <div className="space-y-4">
         <form className="space-y-4" onSubmit={handleSubmit}>
           <div id="profile" className="rounded-2xl bg-white border shadow-sm p-6 space-y-4 scroll-mt-28">
