@@ -11,7 +11,7 @@ const FOOTER_LINKS = [
     icon: 'fa-regular fa-message'
   },
   {
-    href: 'https://https://github.com/murocode/SeedBox.com',
+    href: 'https://github.com/murocode/SeedBox',
     label: 'GitHub',
     icon: 'fa-brands fa-github',
     external: true
