@@ -7,9 +7,10 @@ function toNumber(v: any) {
   return Number.isNaN(n) ? null : n
 }
 
-export async function GET(request: Request, { params }: { params: { seedId: string } }) {
+export async function GET(request: Request, { params }: { params: Promise<{ seedId: string }> }) {
   try {
-    const id = toNumber(params.seedId)
+    const { seedId } = await params
+    const id = toNumber(seedId)
     if (!id) return NextResponse.json({ error: 'invalid id' }, { status: 400 })
 
     const seed = await prisma.seed.findUnique({
@@ -24,9 +25,10 @@ export async function GET(request: Request, { params }: { params: { seedId: stri
   }
 }
 
-export async function PATCH(request: Request, { params }: { params: { seedId: string } }) {
+export async function PATCH(request: Request, { params }: { params: Promise<{ seedId: string }> }) {
   try {
-    const id = toNumber(params.seedId)
+    const { seedId } = await params
+    const id = toNumber(seedId)
     if (!id) return NextResponse.json({ error: 'invalid id' }, { status: 400 })
 
     // 認証チェック
@@ -78,9 +80,10 @@ export async function PATCH(request: Request, { params }: { params: { seedId: st
   }
 }
 
-export async function DELETE(request: Request, { params }: { params: { seedId: string } }) {
+export async function DELETE(request: Request, { params }: { params: Promise<{ seedId: string }> }) {
   try {
-    const id = toNumber(params.seedId)
+    const { seedId } = await params
+    const id = toNumber(seedId)
     if (!id) return NextResponse.json({ error: 'invalid id' }, { status: 400 })
 
     // 認証チェック

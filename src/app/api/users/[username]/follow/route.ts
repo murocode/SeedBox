@@ -4,10 +4,10 @@ import { resolveCurrentUser } from '../../../../../lib/auth'
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { username: string } }
+  { params }: { params: Promise<{ username: string }> }
 ) {
   try {
-    const { username } = params
+    const { username } = await params
     const body = await request.json().catch(() => ({}))
     const accessToken = request.headers.get('authorization')?.replace(/^Bearer\s+/i, '') || body.access_token || null
     const currentUser = await resolveCurrentUser(accessToken)
@@ -56,10 +56,10 @@ export async function POST(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { username: string } }
+  { params }: { params: Promise<{ username: string }> }
 ) {
   try {
-    const { username } = params
+    const { username } = await params
     const body = await request.json().catch(() => ({}))
     const accessToken = request.headers.get('authorization')?.replace(/^Bearer\s+/i, '') || body.access_token || null
     const currentUser = await resolveCurrentUser(accessToken)
@@ -90,10 +90,10 @@ export async function DELETE(
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { username: string } }
+  { params }: { params: Promise<{ username: string }> }
 ) {
   try {
-    const { username } = params
+    const { username } = await params
     const accessToken = request.headers.get('authorization')?.replace(/^Bearer\s+/i, '') || null
     const currentUser = accessToken ? await resolveCurrentUser(accessToken) : null
 
