@@ -2,7 +2,7 @@ import { NextResponse } from "next/server"
 import { supabaseServer } from "../../../../lib/supabaseServer"
 import { prisma } from "../../../../lib/prisma"
 import { buildUniqueUsername } from "../../../../lib/seed-domain"
-import { getSupabaseProviders } from "../../../../lib/auth"
+import { getSupabaseProviders } from "../../../../lib/supabase-auth"
 
 export async function POST(request: Request) {
   try {
