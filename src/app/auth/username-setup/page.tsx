@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '../../../lib/supabaseClient'
 import SiteShellClient from '../../../components/SiteShellClient'
-import { getSupabaseProviders } from '../../../lib/auth'
+import { getSupabaseProviders } from '../../../lib/supabase-auth'
 
 export default function UsernameSetupPage() {
   const router = useRouter()
