@@ -4,10 +4,10 @@ import { resolveCurrentUser } from '../../../../../lib/auth'
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { username: string; seedValue: string } }
+  { params }: { params: Promise<{ username: string; seedValue: string }> }
 ) {
   try {
-    const { username, seedValue } = params
+    const { username, seedValue } = await params
 
     const seed = await prisma.seed.findFirst({
       where: {

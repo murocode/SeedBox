@@ -4,10 +4,11 @@ import { resolveCurrentUser } from '../../../../../../lib/auth'
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { seedId: string } }
+  { params }: { params: Promise<{ seedId: string }> }
 ) {
   try {
-    const seedId = parseInt(params.seedId)
+    const { seedId } = await params
+    const seedIdNumber = parseInt(seedId)
     const body = await request.json().catch(() => ({}))
     const accessToken = request.headers.get('authorization')?.replace(/^Bearer\s+/i, '') || body.access_token || null
     const currentUser = await resolveCurrentUser(accessToken)
@@ -15,7 +16,7 @@ export async function POST(
       return NextResponse.json({ error: 'UNAUTHORIZED' }, { status: 401 })
     }
 
-    const seed = await prisma.seed.findUnique({ where: { id: seedId } })
+    const seed = await prisma.seed.findUnique({ where: { id: seedIdNumber } })
     if (!seed) {
       return NextResponse.json({ error: 'NOT_FOUND' }, { status: 404 })
     }
@@ -23,7 +24,7 @@ export async function POST(
     // 既に存在するかチェック
     const existingLike = await prisma.like.findUnique({
       where: {
-        userUsername_seedId: { userUsername: currentUser.username, seedId }
+        userUsername_seedId: { userUsername: currentUser.username, seedId: seedIdNumber }
       }
     })
 
@@ -32,7 +33,7 @@ export async function POST(
     }
 
     await prisma.like.create({
-      data: { userUsername: currentUser.username, seedId }
+      data: { userUsername: currentUser.username, seedId: seedIdNumber }
     })
 
     return NextResponse.json({ success: true })
@@ -47,10 +48,11 @@ export async function POST(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { seedId: string } }
+  { params }: { params: Promise<{ seedId: string }> }
 ) {
   try {
-    const seedId = parseInt(params.seedId)
+    const { seedId } = await params
+    const seedIdNumber = parseInt(seedId)
     const body = await request.json().catch(() => ({}))
     const accessToken = request.headers.get('authorization')?.replace(/^Bearer\s+/i, '') || body.access_token || null
     const currentUser = await resolveCurrentUser(accessToken)
@@ -59,7 +61,7 @@ export async function DELETE(
     }
 
     await prisma.like.deleteMany({
-      where: { userUsername: currentUser.username, seedId }
+      where: { userUsername: currentUser.username, seedId: seedIdNumber }
     })
 
     return NextResponse.json({ success: true })
