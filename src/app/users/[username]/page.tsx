@@ -10,13 +10,15 @@ import { validateUrl } from '../../../lib/validation'
 
 export const dynamic = 'force-dynamic'
 
-export default async function UserPage({ params }: { params: { username: string } }) {
+export default async function UserPage({ params }: { params: Promise<{ username: string }> }) {
   const cookieStore = await cookies()
   const accessToken = cookieStore.get('sb-access-token')?.value
   const currentUser = accessToken ? await resolveCurrentUser(accessToken) : null
 
+  const { username } = await params
+
   const user = await prisma.user.findUnique({
-    where: { username: params.username.toLowerCase() },
+    where: { username: username.toLowerCase() },
     include: {
       _count: { select: { seeds: true, followers: true } }
     }
@@ -46,7 +48,7 @@ export default async function UserPage({ params }: { params: { username: string 
 
   if (!user) {
     return (
-      <SiteShell title={`@${params.username}`} subtitle="ユーザーが見つかりませんでした。" icon="fa-user">
+      <SiteShell title={`@${username}`} subtitle="ユーザーが見つかりませんでした。" icon="fa-user">
         <div className="rounded-2xl border bg-white p-6 shadow-sm text-slate-600">URL を確認してください。</div>
       </SiteShell>
     )
@@ -64,7 +66,7 @@ export default async function UserPage({ params }: { params: { username: string 
 
   return (
     <SiteShell
-      title={`@${params.username} のユーザーページ`}
+      title={`@${username} のユーザーページ`}
       subtitle="ユーザーのプロフィール、PB、フォロー状態、投稿一覧を表示します。"
       icon="fa-user"
     >
@@ -76,7 +78,7 @@ export default async function UserPage({ params }: { params: { username: string 
                 {user.avatarUrl ? <img src={user.avatarUrl} alt="avatar" className="w-full h-full object-cover" /> : user.username.charAt(0).toUpperCase()}
               </div>
               <div className="min-w-0">
-                <div className="font-semibold text-lg">@{params.username}</div>
+                <div className="font-semibold text-lg">@{username}</div>
                 <div className="mt-1 line-clamp-3 break-words text-sm leading-relaxed text-slate-500">
                   {user.bio || '自己紹介は未設定です'}
                 </div>
@@ -163,7 +165,7 @@ export default async function UserPage({ params }: { params: { username: string 
                   <i className="fa-solid fa-pen-to-square mr-2" aria-hidden />プロフィールを編集
                 </a>
               ) : (
-                <FollowButton username={params.username} />
+                <FollowButton username={username} />
               )}
               {!isOwnProfile && <ReportButton targetType="user" targetUsername={user.username} />}
             </div>
