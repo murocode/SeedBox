@@ -13,7 +13,7 @@ import Link from 'next/link'
 
 export const dynamic = 'force-dynamic'
 
-export default async function SeedDetailPage({ params }: { params: { username: string; seedValue: string } }) {
+export default async function SeedDetailPage({ params }: { params: Promise<{ username: string; seedValue: string }> }) {
   // 現在のユーザーを取得
   let currentUser = null
   try {
@@ -26,10 +26,12 @@ export default async function SeedDetailPage({ params }: { params: { username: s
     // silently fail
   }
 
+  const { username, seedValue } = await params
+
   const seed = await prisma.seed.findFirst({
     where: {
-      seedValue: params.seedValue,
-      author: { username: params.username.toLowerCase() }
+      seedValue,
+      author: { username: username.toLowerCase() }
     },
     include: {
       author: {
@@ -81,7 +83,7 @@ export default async function SeedDetailPage({ params }: { params: { username: s
 
   return (
     <SiteShell
-      title={params.seedValue}
+      title={seedValue}
       subtitle="投稿内容、同じ seed の別投稿、投稿者情報をまとめて確認できます。"
       icon="fa-list-ul"
     >
