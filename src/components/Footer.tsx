@@ -39,7 +39,7 @@ export default function Footer() {
       <div className="mx-auto max-w-6xl px-4 py-4 sm:py-5">
         <div className="flex flex-col items-center gap-3 text-center">
           <Link href="/" className="inline-flex flex-col items-center gap-2">
-                <Image src="/seedbox-logo-black.webp" alt="SeedBox" width={168} height={56} className="max-w-full object-contain" loading="lazy" />
+                <Image src="/seedbox-logo-black.webp" alt="SeedBox" width={56} height={56} className="h-12 w-auto max-w-full object-contain sm:h-14" loading="lazy" />
             <span className="text-xs font-medium text-slate-500">by mur0hi</span>
           </Link>
 
