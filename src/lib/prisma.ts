@@ -5,6 +5,28 @@ declare global {
   var prisma: PrismaClient | undefined
 }
 
+function getPrismaDatabaseUrl() {
+  const databaseUrl = process.env.DATABASE_URL
+  if (!databaseUrl) {
+    return undefined
+  }
+
+  const url = new URL(databaseUrl)
+  const isSupabasePooler = url.hostname.includes('pooler.supabase.com') || url.port === '6543'
+
+  if (isSupabasePooler) {
+    if (!url.searchParams.has('pgbouncer')) {
+      url.searchParams.set('pgbouncer', 'true')
+    }
+
+    if (!url.searchParams.has('connection_limit')) {
+      url.searchParams.set('connection_limit', '1')
+    }
+  }
+
+  return url.toString()
+}
+
 const requiredTables = [
   'User',
   'OAuthAccount',
@@ -16,8 +38,19 @@ const requiredTables = [
   'ModerationLog'
 ]
 
-const basePrisma = global.prisma ?? new PrismaClient()
-if (process.env.NODE_ENV !== 'production') global.prisma = basePrisma
+const prismaDatabaseUrl = getPrismaDatabaseUrl()
+const basePrisma = globalThis.prisma ?? new PrismaClient(
+  prismaDatabaseUrl
+    ? {
+        datasources: {
+          db: {
+            url: prismaDatabaseUrl
+          }
+        }
+      }
+    : undefined
+)
+if (process.env.NODE_ENV !== 'production') globalThis.prisma = basePrisma
 
 let bootstrapPromise: Promise<void> | null = null
 
