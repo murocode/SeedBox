@@ -2,7 +2,6 @@
 
 import React, { useEffect, useMemo, useState } from 'react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import SeedCard from './SeedCard'
 import SeedGrid from './SeedGrid'
 import Accordion from './Accordion'
 import type { DistanceValue, EaseValue, PortalEaseValue, ZeroCycleValue } from '../lib/seed-domain'
@@ -23,12 +22,6 @@ type Seed = {
   zeroCycle?: ZeroCycleValue | null
   _count?: { likes?: number; favorites?: number }
 }
-
-const SAMPLE_SEEDS: Seed[] = [
-  { id: 1, seedValue: '123456789', title: '砂漠に村＋鍛冶屋', comment: '平原村に鍛冶屋があり、ネザー近接が良好です。', author: { username: 'haru' }, owEase: 'EASY', villageType: '平原', hasBlacksmith: true, netherEase: 'EASY', fortressDistance: 'NEAR', portalRoomEase: 'EASY', zeroCycle: 'EASY' },
-  { id: 2, seedValue: '987654321', title: 'ゼロサイクルしやすい', comment: 'エンドのポータルが見つけやすくゼロサイクルが簡単。', author: { username: 'mako' }, owEase: 'NORMAL', villageType: '砂漠', hasBlacksmith: false, netherEase: 'NORMAL', fortressDistance: 'NORMAL', portalRoomEase: 'EASY', zeroCycle: 'EASY' },
-  { id: 3, seedValue: '555666777', title: '廃要塞近め', comment: 'ネザーの橋タイプの砦が近く探索が楽。', author: { username: 'taro' }, owEase: 'EASY', villageType: 'サバンナ', hasBlacksmith: true, netherEase: 'EASY', fortressDistance: 'NEAR', portalRoomEase: 'EASY', zeroCycle: 'HARD' }
-]
 
 const OW_TYPE_OPTIONS = ['村', 'ピラミッド', '埋もれた宝', '難破船', '荒廃したポータル', 'その他']
 const FORTRESS_TYPE_OPTIONS = ['ブリッジ', 'ステーブル', 'ハウジング', 'トレジャー']
@@ -143,8 +136,8 @@ export default function SeedSearchBoard() {
       } catch (fetchError: any) {
         if (fetchError?.name === 'AbortError') return
         console.error(fetchError)
-        setError('API 取得に失敗したためサンプルを表示しています')
-        setResults(SAMPLE_SEEDS)
+        setError('API 取得に失敗しました')
+        setResults([])
       } finally {
         if (!controller.signal.aborted) {
           setLoading(false)

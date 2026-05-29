@@ -10,8 +10,8 @@ import PlayerCard from '../components/PlayerCard'
 export const dynamic = 'force-dynamic'
 
 export default async function Home() {
-  let seedCount = 1284
-  let userCount = 342
+  let seedCount: number | null = null
+  let userCount: number | null = null
   let latestSeeds: any[] = []
   let followingFeedSeeds: any[] = []
   let currentUser: any = null
@@ -97,11 +97,15 @@ export default async function Home() {
         <div className="flex flex-col gap-3 text-sm">
           <div className="rounded-xl bg-white border p-3 shadow-sm w-full text-left">
             <div className="text-slate-400">シード数</div>
-            <div className="text-2xl font-bold text-primary-600">{seedCount.toLocaleString('ja-JP')}</div>
+            <div className="text-2xl font-bold text-primary-600">
+              {seedCount === null ? '取得できませんでした' : seedCount.toLocaleString('ja-JP')}
+            </div>
           </div>
           <div className="rounded-xl bg-white border p-3 shadow-sm w-full text-left">
             <div className="text-slate-400">ユーザー数</div>
-            <div className="text-2xl font-bold text-primary-600">{userCount.toLocaleString('ja-JP')}</div>
+            <div className="text-2xl font-bold text-primary-600">
+              {userCount === null ? '取得できませんでした' : userCount.toLocaleString('ja-JP')}
+            </div>
           </div>
         </div>
       }
