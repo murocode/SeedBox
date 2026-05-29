@@ -12,15 +12,18 @@ function getPrismaDatabaseUrl() {
   }
 
   const url = new URL(databaseUrl)
-  const isSupabasePooler = url.hostname.includes('pooler.supabase.com') || url.port === '6543'
+  const hostname = url.hostname.toLowerCase()
+  const isLocalDatabase = ['localhost', '127.0.0.1', '::1'].includes(hostname)
+  const isSupabasePooler =
+    hostname.includes('pooler.supabase.com') || url.port === '6543' || url.searchParams.get('pgbouncer') === 'true'
+
+  if (!isLocalDatabase && !url.searchParams.has('connection_limit')) {
+    url.searchParams.set('connection_limit', '1')
+  }
 
   if (isSupabasePooler) {
     if (!url.searchParams.has('pgbouncer')) {
       url.searchParams.set('pgbouncer', 'true')
-    }
-
-    if (!url.searchParams.has('connection_limit')) {
-      url.searchParams.set('connection_limit', '1')
     }
   }
 
