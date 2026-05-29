@@ -103,7 +103,12 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ s
       return NextResponse.json({ error: 'FORBIDDEN' }, { status: 403 })
     }
 
-    await prisma.seed.delete({ where: { id } })
+    await prisma.$transaction(async tx => {
+      await tx.like.deleteMany({ where: { seedId: id } })
+      await tx.favorite.deleteMany({ where: { seedId: id } })
+      await tx.report.deleteMany({ where: { targetSeedId: id } })
+      await tx.seed.delete({ where: { id } })
+    })
     return NextResponse.json({ ok: true })
   } catch (err: any) {
     console.error(err)

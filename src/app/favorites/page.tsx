@@ -33,23 +33,41 @@ export default async function FavoritesPage() {
   const favs = await prisma.favorite.findMany({
     where: { userUsername: currentUser.username },
     orderBy: { createdAt: 'desc' },
-    include: {
-      seed: {
+    select: { seedId: true }
+  })
+
+  const seedIds = favs.map(f => f.seedId)
+  const seeds = seedIds.length > 0
+    ? await prisma.seed.findMany({
+        where: { id: { in: seedIds } },
         include: {
           author: { select: { username: true, avatarUrl: true, speedrunId: true } },
           _count: { select: { likes: true, favorites: true } }
         }
-      }
-    }
-  })
+      })
+    : []
 
-  const seeds = favs.map(f => f.seed)
+  const seedMap = new Map(seeds.map(seed => [seed.id, seed]))
+  const orderedSeeds = favs
+    .map(fav => seedMap.get(fav.seedId))
+    .filter((seed): seed is (typeof seeds)[number] => Boolean(seed))
+
+  const missingSeedIds = seedIds.filter(seedId => !seedMap.has(seedId))
+  if (missingSeedIds.length > 0) {
+    await prisma.favorite.deleteMany({
+      where: {
+        userUsername: currentUser.username,
+        seedId: { in: missingSeedIds }
+      }
+    })
+  }
+
   let likedSet = new Set<number>()
 
-  if (seeds.length > 0) {
-    const seedIds = seeds.map(seed => seed.id)
+  if (orderedSeeds.length > 0) {
+    const orderedSeedIds = orderedSeeds.map(seed => seed.id)
     const userLikes = await prisma.like.findMany({
-      where: { userUsername: currentUser.username, seedId: { in: seedIds } },
+      where: { userUsername: currentUser.username, seedId: { in: orderedSeedIds } },
       select: { seedId: true }
     })
     userLikes.forEach(like => likedSet.add(like.seedId))
@@ -58,11 +76,11 @@ export default async function FavoritesPage() {
   return (
     <SiteShell title="お気に入り" subtitle="お気に入りに登録したシード一覧" icon="fa-star">
       <div className="space-y-6">
-        {seeds.length === 0 ? (
+        {orderedSeeds.length === 0 ? (
           <div className="rounded-2xl bg-white border shadow-sm p-6 text-sm text-slate-700">お気に入りに登録されたシードがありません。</div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {seeds.map(seed => (
+            {orderedSeeds.map(seed => (
               <SeedCard
                 key={seed.id}
                 seed={seed as any}
