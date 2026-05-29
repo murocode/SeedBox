@@ -11,6 +11,7 @@
     },
     "dependencies": {
         "@prisma/client": "^4.16.2",
+        "@vercel/speed-insights": "^0.1.0",
         "@supabase/supabase-js": "^2.35.0",
         "next": "16.2.6",
         "react": "19.2.6",

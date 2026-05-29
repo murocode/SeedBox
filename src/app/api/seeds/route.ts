@@ -1,6 +1,7 @@
 import { NextResponse, NextRequest } from 'next/server'
 import { cookies } from 'next/headers'
 import { prisma } from '../../../lib/prisma'
+import { cacheGet, cacheSet } from '../../../lib/cache'
 import { resolveCurrentUser } from '../../../lib/auth'
 import {
   buildUniqueUsername,
@@ -34,6 +35,19 @@ export async function GET(request: NextRequest) {
   try {
     const url = new URL(request.url)
     const q = url.searchParams
+
+    // simple cache: only cache anonymous/listing queries (no personalized following)
+    const cookieStore = await cookies()
+    const accessToken = cookieStore.get('sb-access-token')?.value
+    const isFollowingOnly = q.get('followingOnly') === 'true'
+    const cacheTtl = Number(process.env.SEEDS_CACHE_TTL || '30')
+    const cacheKey = `seeds:${url.pathname}?${url.searchParams.toString()}`
+    if (!accessToken && !isFollowingOnly) {
+      const cached = await cacheGet(cacheKey)
+      if (cached) {
+        return NextResponse.json(cached)
+      }
+    }
 
     const where: any = {}
 
@@ -108,25 +122,48 @@ export async function GET(request: NextRequest) {
       const withPbWhere = { ...(baseWhere || {}), AND: [ ...(baseWhere?.AND || []), { author: { pbTime: { not: null } } } ] }
       const nullPbWhere = { ...(baseWhere || {}), AND: [ ...(baseWhere?.AND || []), { author: { pbTime: null } } ] }
 
-      const nonNullSeeds = await prisma.seed.findMany({
+      // non-null pb の総件数を取得して、必要な分だけ取得するようにする（skip+takeで大量取得しない）
+      const countWithPb = await prisma.seed.count({ where: withPbWhere })
+
+      let nonNullOffset = 0
+      let nonNullTake = 0
+      let nullOffset = 0
+      let nullTake = 0
+
+      if (skip < countWithPb) {
+        nonNullOffset = skip
+        nonNullTake = Math.min(take, Math.max(0, countWithPb - skip))
+        nullOffset = 0
+        nullTake = take - nonNullTake
+      } else {
+        nonNullOffset = 0
+        nonNullTake = 0
+        nullOffset = skip - countWithPb
+        nullTake = take
+      }
+
+      const nonNullSeeds = nonNullTake > 0 ? await prisma.seed.findMany({
         where: withPbWhere,
         include,
         orderBy: { author: { pbTime: orderDir } },
-        take: skip + take
-      })
+        skip: nonNullOffset,
+        take: nonNullTake
+      }) : []
 
-      const nullSeeds = await prisma.seed.findMany({
+      const nullSeeds = nullTake > 0 ? await prisma.seed.findMany({
         where: nullPbWhere,
         include,
         // null の方は作成日時順に並べる
         orderBy: { createdAt: orderDir },
-        take: skip + take
-      })
+        skip: nullOffset,
+        take: nullTake
+      }) : []
 
       const combined = nonNullSeeds.concat(nullSeeds)
-      const sliced = combined.slice(skip, skip + take)
 
-      return NextResponse.json({ seeds: sliced, total, take, skip })
+      const resp = { seeds: combined, total, take, skip }
+      if (!accessToken && !isFollowingOnly) await cacheSet(cacheKey, resp, cacheTtl)
+      return NextResponse.json(resp)
     }
 
     const seeds = await prisma.seed.findMany({
@@ -137,7 +174,9 @@ export async function GET(request: NextRequest) {
       orderBy
     })
 
-    return NextResponse.json({ seeds, total: seeds.length, take, skip })
+    const resp = { seeds, total: seeds.length, take, skip }
+    if (!accessToken && !isFollowingOnly) await cacheSet(cacheKey, resp, cacheTtl)
+    return NextResponse.json(resp)
   } catch (err) {
     console.error(err)
     return NextResponse.json({ error: 'internal' }, { status: 500 })
