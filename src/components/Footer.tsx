@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import SupportModal, { SUPPORT_CATEGORY_OPTIONS, type SupportCategory } from './SupportModal'
 
 const FOOTER_LINKS = [
@@ -38,7 +39,7 @@ export default function Footer() {
       <div className="mx-auto max-w-6xl px-4 py-4 sm:py-5">
         <div className="flex flex-col items-center gap-3 text-center">
           <Link href="/" className="inline-flex flex-col items-center gap-2">
-                <img src="/seedbox-logo-black.png" alt="SeedBox" className="h-12 w-auto max-w-full object-contain sm:h-14" />
+                <Image src="/seedbox-logo-black.webp" alt="SeedBox" width={168} height={56} className="max-w-full object-contain" loading="lazy" />
             <span className="text-xs font-medium text-slate-500">by mur0hi</span>
           </Link>
 

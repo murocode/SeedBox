@@ -2,6 +2,7 @@ import React from 'react'
 import Footer from './Footer'
 import { cookies } from 'next/headers'
 import Link from 'next/link'
+import Image from 'next/image'
 import { resolveCurrentUser, hasModerationAccess } from '../lib/auth'
 import AccountMenu from './AccountMenu'
 import SiteNavClient from './SiteNavClient'
@@ -47,7 +48,7 @@ export default async function SiteShell({
         <div className="container mx-auto px-4 py-5 flex items-center justify-between gap-6">
           <div>
             <Link href="/" className="inline-flex items-center gap-3">
-              <img src="/seedbox-logo.png" alt="SeedBox" className="h-10 w-10 object-contain" />
+              <Image src="/seedbox-logo-small.webp" alt="SeedBox" width={40} height={40} className="object-contain" priority />
               <div>
                 <div className="text-2xl font-bold text-primary-600">
                   Seed<span className="text-[#2d2d2d]">Box</span>
