@@ -1,7 +1,5 @@
 ﻿import '../styles/globals.css'
 import React from 'react'
-// @ts-ignore: optional dev dependency for Vercel deployments
-import { SpeedInsights } from '@vercel/speed-insights/next'
 
 export const metadata = {
   title: 'SeedBox for MinecraftRSG',
@@ -22,7 +20,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body className="min-h-screen bg-slate-50 text-slate-900 antialiased flex flex-col">
         {children}
-        <SpeedInsights />
       </body>
     </html>
   )
