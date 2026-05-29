@@ -1,13 +1,12 @@
-import { cookies } from 'next/headers'
 import { prisma } from '../lib/prisma'
-import { resolveCurrentUser } from '../lib/auth'
 import SiteShell from '../components/SiteShell'
 import SeedCard from '../components/SeedCard'
 import SeedGrid from '../components/SeedGrid'
 import PlayerRow from '../components/PlayerRow'
 import PlayerCard from '../components/PlayerCard'
 
-export const dynamic = 'force-dynamic'
+// 公開データは ISR を使ってキャッシュして FCP を改善する
+export const revalidate = 60
 
 export default async function Home() {
   let seedCount: number | null = null
@@ -18,9 +17,6 @@ export default async function Home() {
   let nearbyPlayers: any[] = []
 
   try {
-    const cookieStore = await cookies()
-    const accessToken = cookieStore.get('sb-access-token')?.value
-
     const [dbSeedCount, dbUserCount, dbLatestSeeds] = await Promise.all([
       prisma.seed.count(),
       prisma.user.count(),
@@ -38,47 +34,8 @@ export default async function Home() {
     userCount = dbUserCount
     latestSeeds = dbLatestSeeds
 
-    // 近いタイム帯のプレイヤーを取得（自分のPBがありかつ speedrunId 登録がある場合のみ）
-    let dbNearbyPlayers: any[] = []
-    if (currentUser && currentUser.speedrunId && typeof currentUser.pbTime === 'number') {
-      const lower = Math.max(0, currentUser.pbTime - 120) // -2分
-      const upper = currentUser.pbTime + 120 // +2分
-      const candidates = await prisma.user.findMany({
-        where: { pbTime: { gte: lower, lte: upper }, username: { not: currentUser.username } },
-        select: { username: true, avatarUrl: true, pbTime: true }
-      })
-
-      // 近さでソートして上位20件を選ぶ
-      dbNearbyPlayers = candidates
-        .sort((a, b) => Math.abs((a.pbTime ?? 0) - currentUser.pbTime) - Math.abs((b.pbTime ?? 0) - currentUser.pbTime))
-        .slice(0, 20)
-    } else {
-      dbNearbyPlayers = [] // ログインしていないか、speedrunId/自分のPBがない場合は一覧表示しない
-    }
-
-    nearbyPlayers = dbNearbyPlayers
-
-    // ユーザーがログインしている場合、フォロー中フィードを取得
-    if (accessToken) {
-      currentUser = await resolveCurrentUser(accessToken)
-      if (currentUser) {
-        followingFeedSeeds = await prisma.seed.findMany({
-          where: {
-            author: {
-              followers: {
-                some: { followerUsername: currentUser.username }
-              }
-            }
-          },
-          take: 10,
-          orderBy: { createdAt: 'desc' },
-          include: {
-            author: { select: { username: true, avatarUrl: true } },
-            _count: { select: { likes: true, favorites: true } }
-          }
-        })
-      }
-    }
+    // サーバー側ではパーソナライズを行わない（クッキー依存処理はクライアント側へ移す）
+    nearbyPlayers = []
   } catch (error) {
     console.error('home data load failed', error)
   }
