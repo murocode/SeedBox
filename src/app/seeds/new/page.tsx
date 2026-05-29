@@ -2,9 +2,10 @@
 
 import SiteShellClient from '../../../components/SiteShellClient'
 import { useRouter } from 'next/navigation'
-import type { FormEvent } from 'react'
+import type { FormEvent, KeyboardEvent } from 'react'
 import { useState } from 'react'
 import { supabase } from '../../../lib/supabaseClient'
+import { validateSeedValue } from '../../../lib/validation'
 
 interface FormState {
   seed: string
@@ -42,6 +43,7 @@ export default function SeedNewPage() {
   const [submitting, setSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState('')
   const [submitSuccess, setSubmitSuccess] = useState('')
+  const [seedError, setSeedError] = useState('')
 
   const [expandedSections, setExpandedSections] = useState({
     overworld: true,
@@ -50,7 +52,37 @@ export default function SeedNewPage() {
   })
 
   const handleInputChange = (field: keyof FormState, value: any) => {
+    if (field === 'seed') {
+      setForm(prev => ({ ...prev, seed: value }))
+      const v = typeof value === 'string' ? value.trim() : ''
+      if (!v) {
+        setSeedError('必須項目です')
+      } else if (!validateSeedValue(v)) {
+        setSeedError('整数で入力してください（マイナスも可）')
+      } else {
+        setSeedError('')
+      }
+      return
+    }
+
     setForm(prev => ({ ...prev, [field]: value }))
+  }
+
+  const seedKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    const allowed = ['Backspace', 'ArrowLeft', 'ArrowRight', 'Delete', 'Tab', 'Home', 'End']
+    if (allowed.includes(e.key) || e.ctrlKey || e.metaKey) return
+    const isMinus = e.key === '-'
+    const isDigit = /^\d$/.test(e.key)
+    if (!isDigit && !isMinus) {
+      e.preventDefault()
+      return
+    }
+    const el = e.currentTarget as HTMLInputElement
+    if (isMinus) {
+      if (el.selectionStart !== 0 || el.value.includes('-')) {
+        e.preventDefault()
+      }
+    }
   }
 
   const toggleArrayField = (field: 'owTypes' | 'fortressTypes', value: string) => {
@@ -146,7 +178,7 @@ export default function SeedNewPage() {
     setSubmitSuccess('')
 
     const errors: string[] = []
-    if (!form.seed.trim()) errors.push('Seed値')
+    if (!form.seed.trim() || seedError) errors.push('Seed値')
     if (!form.title.trim()) errors.push('タイトル')
 
     if (errors.length > 0) {
@@ -229,11 +261,18 @@ export default function SeedNewPage() {
                 <label className="text-sm font-semibold text-slate-700 block mb-2">Seed 値 *</label>
                 <input
                   type="text"
+                  inputMode="numeric"
+                  pattern="[0-9\-]*"
+                  aria-invalid={!!seedError}
                   value={form.seed}
                   onChange={e => handleInputChange('seed', e.target.value)}
+                  onKeyDown={seedKeyDown}
                   placeholder="例: 123456789"
                   className="w-full rounded-lg border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-600"
                 />
+                {seedError ? (
+                  <div className="text-xs text-red-600 mt-1">{seedError}</div>
+                ) : null}
               </div>
               <div>
                 <label className="text-sm font-semibold text-slate-700 block mb-2">タイトル *</label>
@@ -408,7 +447,7 @@ export default function SeedNewPage() {
           <button
             type="submit"
             className="btn btn-primary w-full py-3 font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
-            disabled={submitting}
+            disabled={submitting || !!seedError || !form.seed.trim()}
           >
             {submitting ? '投稿中...' : '投稿する'}
           </button>
@@ -423,8 +462,7 @@ export default function SeedNewPage() {
                 <span>必須項目です</span>
               </div>
               <div>・タグは投稿者の主観で選択してください</div>
-              <div>・同一ユーザーによる同一 seed の重複投稿は不可</div>
-              <div>・コメントは Markdown に対応しています</div>
+              <div>・同一ユーザーによる同一シードの重複投稿は不可</div>            
             </div>
 
             <div className="mt-5 pt-5 border-t">

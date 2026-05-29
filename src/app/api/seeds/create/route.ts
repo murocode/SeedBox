@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
       zeroCycle
     } = body
 
-    const authorUsername = currentUser.username.toLowerCase()
+    const authorUsername = currentUser.username
 
     // バリデーション
     if (!seedValue || !authorUsername) {

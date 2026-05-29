@@ -157,7 +157,7 @@ export async function POST(request: Request) {
     const seedValue = parseSeedValue(body.seedValue)
     const title = typeof body.title === 'string' && body.title.trim() ? body.title.trim() : null
     const comment = typeof body.comment === 'string' && body.comment.trim() ? body.comment.trim().slice(0, 1000) : null
-    const authorUsername = currentUser.username.toLowerCase()
+      const authorUsername = currentUser.username
 
     if (!seedValue) return NextResponse.json({ error: 'seedValue required' }, { status: 400 })
 
