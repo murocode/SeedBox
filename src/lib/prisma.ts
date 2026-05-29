@@ -206,6 +206,11 @@ async function bootstrapDatabase() {
 }
 
 async function ensureDatabaseReady() {
+  // Skip runtime schema bootstrapping in production — handle via migrations during deploy
+  if (process.env.NODE_ENV === 'production') {
+    return Promise.resolve()
+  }
+
   if (!bootstrapPromise) {
     bootstrapPromise = bootstrapDatabase().catch(error => {
       bootstrapPromise = null
