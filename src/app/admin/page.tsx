@@ -72,33 +72,31 @@ export default async function AdminPage() {
     )
   }
 
-  const [reports, moderationLogs, seedCount, userCount] = await Promise.all([
-    prisma.report.findMany({
-      orderBy: { createdAt: 'desc' },
-      take: 10,
-      include: {
-        reporter: { select: { username: true, email: true } },
-        seed: { select: { id: true, seedValue: true, author: { select: { username: true } } } },
-        targetUser: {
-          select: {
-            username: true,
-            seeds: {
-              select: { id: true, seedValue: true },
-              take: 10,
-              orderBy: { createdAt: 'desc' }
-            }
+  const reports = await prisma.report.findMany({
+    orderBy: { createdAt: 'desc' },
+    take: 10,
+    include: {
+      reporter: { select: { username: true, email: true } },
+      seed: { select: { id: true, seedValue: true, author: { select: { username: true } } } },
+      targetUser: {
+        select: {
+          username: true,
+          seeds: {
+            select: { id: true, seedValue: true },
+            take: 10,
+            orderBy: { createdAt: 'desc' }
           }
         }
       }
-    }),
-    prisma.moderationLog.findMany({
-      orderBy: { createdAt: 'desc' },
-      take: 10,
-      include: { moderator: { select: { username: true } } }
-    }),
-    prisma.seed.count(),
-    prisma.user.count()
-  ])
+    }
+  })
+  const moderationLogs = await prisma.moderationLog.findMany({
+    orderBy: { createdAt: 'desc' },
+    take: 10,
+    include: { moderator: { select: { username: true } } }
+  })
+  const seedCount = await prisma.seed.count()
+  const userCount = await prisma.user.count()
 
   return (
     <SiteShell title="管理画面" subtitle="通報対応・警告・BAN・強制削除などの運用画面です。" icon="fa-shield-halved">
