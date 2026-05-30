@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import SupportModal, { SUPPORT_CATEGORY_OPTIONS, type SupportCategory } from './SupportModal'
+import CreditsModal from './CreditsModal'
 
 const FOOTER_LINKS = [
   {
@@ -27,6 +28,7 @@ const FOOTER_LINKS = [
 
 export default function Footer() {
   const [modalOpen, setModalOpen] = useState(false)
+  const [creditsOpen, setCreditsOpen] = useState(false)
   const [category, setCategory] = useState<SupportCategory>('CONTACT')
 
   function openSupportModal(nextCategory: SupportCategory) {
@@ -53,6 +55,15 @@ export default function Footer() {
               <span className="text-xs">お問い合わせ</span>
             </button>
 
+            <button
+              type="button"
+              onClick={() => setCreditsOpen(true)}
+              className="inline-flex items-center gap-2 transition-colors hover:text-primary-600"
+            >
+              <i className="fa-regular fa-circle-user text-[0.85em]" aria-hidden />
+              <span className="text-xs">クレジット</span>
+            </button>
+
             {FOOTER_LINKS.slice(1).map((item) => (
               <a
                 key={item.label}
@@ -70,6 +81,7 @@ export default function Footer() {
       </div>
 
       <SupportModal open={modalOpen} initialCategory={category} onClose={() => setModalOpen(false)} />
+      <CreditsModal open={creditsOpen} onClose={() => setCreditsOpen(false)} />
     </footer>
   )
 }
