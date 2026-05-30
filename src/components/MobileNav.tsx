@@ -3,6 +3,7 @@ import React, { useState } from 'react'
 import { createPortal } from 'react-dom'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import PostButton from './PostButton'
 
 type NavItem = { href: string; label: string }
 
@@ -25,7 +26,7 @@ function getIconForLabel(label: string) {
   }
 }
 
-export default function MobileNav({ currentUser, canModerate, postHref }: { currentUser?: any | null; canModerate?: boolean; postHref?: string }) {
+export default function MobileNav({ currentUser, canModerate }: { currentUser?: any | null; canModerate?: boolean }) {
   const [open, setOpen] = useState(false)
   const router = useRouter()
 
@@ -79,9 +80,10 @@ export default function MobileNav({ currentUser, canModerate, postHref }: { curr
                   </ul>
 
                   <div className="mt-4">
-                    <a href={postHref || '/login'} onClick={() => setOpen(false)} className="inline-block w-full rounded-md bg-primary-600 px-4 py-2 text-center text-sm font-medium text-white hover:bg-primary-700">
-                      投稿
-                    </a>
+                    <PostButton
+                      onNavigate={() => setOpen(false)}
+                      className="inline-block w-full rounded-md bg-primary-600 px-4 py-2 text-center text-sm font-medium text-white hover:bg-primary-700"
+                    />
                   </div>
 
                   {canModerate ? (
