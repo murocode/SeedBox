@@ -17,18 +17,16 @@ export default async function Home() {
   let nearbyPlayers: any[] = []
 
   try {
-    const [dbSeedCount, dbUserCount, dbLatestSeeds] = await Promise.all([
-      prisma.seed.count(),
-      prisma.user.count(),
-      prisma.seed.findMany({
-        take: 20,
-        orderBy: { createdAt: 'desc' },
-        include: {
-          author: { select: { username: true, avatarUrl: true } },
-          _count: { select: { likes: true, favorites: true } }
-        }
-      })
-    ])
+    const dbSeedCount = await prisma.seed.count()
+    const dbUserCount = await prisma.user.count()
+    const dbLatestSeeds = await prisma.seed.findMany({
+      take: 20,
+      orderBy: { createdAt: 'desc' },
+      include: {
+        author: { select: { username: true, avatarUrl: true } },
+        _count: { select: { likes: true, favorites: true } }
+      }
+    })
 
     seedCount = dbSeedCount
     userCount = dbUserCount
