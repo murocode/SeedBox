@@ -4,10 +4,10 @@ import Footer from './Footer'
 import AccountMenu from './AccountMenu'
 import Link from 'next/link'
 import Image from 'next/image'
-import { useRouter } from 'next/navigation'
 import SiteNavClient from './SiteNavClient'
 import MobileNav from './MobileNav'
 import PageHeader from './PageHeader'
+import PostButton from './PostButton'
 import { supabase } from '../lib/supabaseClient'
 
 type NavItem = { href: string; label: string }
@@ -35,7 +35,6 @@ export default function SiteShellClient({
   layout?: 'page' | 'hero'
   currentUser?: { username: string; email?: string | null; avatarUrl?: string | null } | null
 }) {
-  const router = useRouter()
   const [mobileUser, setMobileUser] = useState(currentUser)
 
   useEffect(() => {
@@ -89,11 +88,6 @@ export default function SiteShellClient({
     }
   }, [currentUser])
 
-  const handlePostClick = async () => {
-    const { data: sessionData } = await supabase.auth.getSession()
-    router.push(sessionData.session ? '/seeds/new' : '/login')
-  }
-
   return (
     <div className="flex min-h-screen flex-col">
       <header className="site-header sticky top-0 z-30 backdrop-blur bg-white/90">
@@ -115,13 +109,13 @@ export default function SiteShellClient({
 
           <div className="hidden md:flex md:items-center md:gap-3">
             <div className="flex items-center gap-3">
-              <button type="button" onClick={handlePostClick} className="rounded-full bg-primary-600 px-3 py-2 text-sm font-medium text-white transition hover:bg-primary-700"><i className="fa-solid fa-plus mr-2" aria-hidden />投稿</button>
+              <PostButton className="rounded-full bg-primary-600 px-3 py-2 text-sm font-medium text-white transition hover:bg-primary-700" />
               <AccountMenu currentUser={currentUser} loadCurrentUser={currentUser === undefined} />
             </div>
           </div>
 
           <div className="md:hidden flex items-center gap-2">
-            <MobileNav currentUser={mobileUser ? { username: mobileUser.username } : null} postHref={mobileUser ? '/seeds/new' : '/login'} />
+            <MobileNav currentUser={mobileUser ? { username: mobileUser.username } : null} />
           </div>
         </div>
       </header>

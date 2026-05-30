@@ -1,13 +1,12 @@
 import React from 'react'
 import Footer from './Footer'
-import { cookies } from 'next/headers'
 import Link from 'next/link'
 import Image from 'next/image'
-import { resolveCurrentUser, hasModerationAccess } from '../lib/auth'
 import AccountMenu from './AccountMenu'
 import SiteNavClient from './SiteNavClient'
 import MobileNav from './MobileNav'
 import PageHeader from './PageHeader'
+import PostButton from './PostButton'
 
 type NavItem = { href: string; label: string }
 
@@ -36,11 +35,11 @@ export default async function SiteShell({
   icon?: string
   layout?: 'page' | 'hero'
 }) {
-  const cookieStore = await cookies()
-  const accessToken = cookieStore.get('sb-access-token')?.value
-  const currentUser = await resolveCurrentUser(accessToken)
-  const canModerate = hasModerationAccess(currentUser)
-  const postHref = currentUser ? '/seeds/new' : '/login'
+  // Avoid resolving the current user on the server for every page render —
+  // client-side `AccountMenu` will load user data when needed. This
+  // significantly reduces server-side latency for public pages.
+  const canModerate = false
+  const currentUser = undefined
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -66,13 +65,13 @@ export default async function SiteShell({
               <a href="/admin" className="ml-4 hover:text-primary-600 transition-colors">管理画面</a>
             ) : null}
             <div className="flex items-center gap-3">
-              <a href={postHref} className="rounded-full bg-primary-600 px-3 py-2 text-sm font-medium text-white transition hover:bg-primary-700"><i className="fa-solid fa-plus mr-2" aria-hidden />投稿</a>
-              <AccountMenu currentUser={currentUser ? { username: currentUser.username, email: currentUser.email, avatarUrl: currentUser.avatarUrl } : null} />
+              <PostButton className="rounded-full bg-primary-600 px-3 py-2 text-sm font-medium text-white transition hover:bg-primary-700" />
+              <AccountMenu loadCurrentUser={true} />
             </div>
           </div>
 
           <div className="md:hidden flex items-center gap-2">
-            <MobileNav currentUser={currentUser ? { username: currentUser.username } : null} canModerate={canModerate} postHref={postHref} />
+            <MobileNav canModerate={canModerate} />
           </div>
         </div>
       </header>

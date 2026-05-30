@@ -462,7 +462,8 @@ export default function SeedNewPage() {
                 <span>必須項目です</span>
               </div>
               <div>・タグは投稿者の主観で選択してください</div>
-              <div>・同一ユーザーによる同一シードの重複投稿は不可</div>            
+              <div>・同一ユーザーによる同一シードの重複投稿は不可</div>  
+              <div>・現在は1.16.1のシードのみ対応しています。他のバージョンのシードは入力しないでください。</div>          
             </div>
 
             <div className="mt-5 pt-5 border-t">
