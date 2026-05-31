@@ -3,8 +3,8 @@ import React from 'react'
 import { SpeedInsights } from '@vercel/speed-insights/next'
 
 export const metadata = {
-  title: 'SeedBox for MinecraftRSG',
-  description: 'Minecraft Java Edition 1.16.1 RSG シードデータベース'
+  title: 'SeedBox for Minecraft Speedrunning',
+  description: 'Minecraft Java Edition 1.16.1 Speedrunning シードデータベース'
 }
 
  

@@ -97,7 +97,7 @@ export default function LoginPage() {
   }
 
   return (
-    <SiteShellClient title="SeedBox for MinecraftRSG へログイン" subtitle="Discord または Google アカウントでログイン・登録できます。" icon="fa-right-to-bracket">
+    <SiteShellClient title="SeedBox for Minecraft Speedrunning へログイン" subtitle="Discord または Google アカウントでログイン・登録できます。" icon="fa-right-to-bracket">
       <div className="max-w-md mx-auto rounded-2xl bg-white border shadow-lg p-6">
         <h2 className="text-xl font-semibold mb-2">ログイン / 登録</h2>
         <p className="text-sm text-slate-600 mb-5">初回ログイン時にユーザー名を設定します。</p>

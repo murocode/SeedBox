@@ -2,6 +2,8 @@ import SiteShell from '../../../components/SiteShell'
 import SeedCard from '../../../components/SeedCard'
 import FollowButton from '../../../components/FollowButton'
 import ReportButton from '../../../components/ReportButton'
+import SeedGridSkeleton from '../../../components/SeedGridSkeleton'
+import UserSeedsClient from '../../../components/UserSeedsClient'
 import { cookies } from 'next/headers'
 import { prisma } from '../../../lib/prisma'
 import { hasModerationAccess, resolveCurrentUser } from '../../../lib/auth'
@@ -176,18 +178,8 @@ export default async function UserPage({ params }: { params: Promise<{ username:
           <div className="flex items-center justify-between text-sm text-slate-500">
             <div>投稿一覧</div>
           </div>
-          {seeds.length === 0 ? (
-            <div className="rounded-2xl bg-white border shadow-sm p-5 text-sm text-slate-600">まだ投稿がありません。</div>
-          ) : (
-            seeds.map(seed => (
-              <SeedCard
-                key={seed.id}
-                seed={seed as any}
-                initialLiked={likedSet.has(seed.id)}
-                initialFavorited={favoritedSet.has(seed.id)}
-              />
-            ))
-          )}
+          {/** Client-rendered seed list */}
+          <UserSeedsClient seeds={seeds} likedSet={Array.from(likedSet)} favoritedSet={Array.from(favoritedSet)} />
         </section>
       </div>
     </SiteShell>
