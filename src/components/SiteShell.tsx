@@ -71,7 +71,7 @@ export default async function SiteShell({
           </div>
 
           <div className="md:hidden flex items-center gap-2">
-            <MobileNav canModerate={canModerate} />
+            <MobileNav />
           </div>
         </div>
       </header>

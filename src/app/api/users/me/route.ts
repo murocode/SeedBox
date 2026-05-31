@@ -46,6 +46,7 @@ export async function GET(request: NextRequest) {
     const safeUser = {
       username: user.username,
       email: user.email,
+      role: currentUser.role,
       bio: user.bio,
       youtubeUrl: user.youtubeUrl,
       xUrl: user.xUrl,
