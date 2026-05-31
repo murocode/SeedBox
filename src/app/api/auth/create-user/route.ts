@@ -20,6 +20,7 @@ export async function POST(request: NextRequest) {
       )
     )
     const normalizedUsername = typeof username === 'string' ? username.trim().toLowerCase() : ''
+    const normalizedProviderAccountId = typeof providerAccountId === 'string' ? providerAccountId.trim() : ''
 
     // リクエスト検証
     if (!normalizedUsername || !email) {
@@ -40,15 +41,15 @@ export async function POST(request: NextRequest) {
 
     if (existingByEmail) {
       // 既存ユーザーがいる場合、OAuthアカウント連携を追加
-      if (providerAccountId && normalizedProviders.length > 0) {
+      if (normalizedProviderAccountId && normalizedProviders.length > 0) {
         await Promise.all(
           normalizedProviders.map(provider =>
             prisma.oAuthAccount.upsert({
-              where: { provider_providerAccountId: { provider, providerAccountId } },
+              where: { provider_providerAccountId: { provider, providerAccountId: normalizedProviderAccountId } },
               update: { userUsername: existingByEmail.username },
               create: {
                 provider,
-                providerAccountId,
+                providerAccountId: normalizedProviderAccountId,
                 userUsername: existingByEmail.username
               }
             }).catch(() => null)
@@ -103,15 +104,15 @@ export async function POST(request: NextRequest) {
       include: { oauthAccounts: { select: { provider: true } } }
     })
 
-    if (providerAccountId && normalizedProviders.length > 0) {
+    if (normalizedProviderAccountId && normalizedProviders.length > 0) {
       await Promise.all(
         normalizedProviders.map(provider =>
           prisma.oAuthAccount.upsert({
-            where: { provider_providerAccountId: { provider, providerAccountId } },
+            where: { provider_providerAccountId: { provider, providerAccountId: normalizedProviderAccountId } },
             update: { userUsername: newUser.username },
             create: {
               provider,
-              providerAccountId,
+              providerAccountId: normalizedProviderAccountId,
               userUsername: newUser.username
             }
           }).catch(() => null)
