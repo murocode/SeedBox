@@ -1,5 +1,6 @@
 import { prisma } from '../../../../lib/prisma'
-import { supabase } from '../../../../lib/supabaseClient'
+import { normalizeEmail } from '../../../../lib/auth'
+import { supabaseServer } from '../../../../lib/supabaseServer'
 import { NextRequest, NextResponse } from 'next/server'
 
 export async function DELETE(request: NextRequest) {
@@ -16,8 +17,9 @@ export async function DELETE(request: NextRequest) {
     const token = authHeader.slice(7)
 
     // Verify token and get user
-    const { data: userData, error: userError } = await supabase.auth.getUser(token)
-    if (userError || !userData.user?.email) {
+    const { data: userData, error: userError } = await supabaseServer.auth.getUser(token)
+    const email = normalizeEmail(userData.user?.email)
+    if (userError || !email) {
       return NextResponse.json(
         { error: 'Invalid token' },
         { status: 401 }
@@ -26,7 +28,7 @@ export async function DELETE(request: NextRequest) {
 
     // Get username from database by email
     const user = await prisma.user.findFirst({
-      where: { email: userData.user.email }
+      where: { email }
     })
 
     if (!user) {
@@ -37,70 +39,62 @@ export async function DELETE(request: NextRequest) {
     }
 
     const username = user.username
+    const seedIds = await prisma.seed.findMany({
+      where: { authorUsername: username },
+      select: { id: true }
+    }).then(rows => rows.map(row => row.id))
 
     // Delete all related data in a single batch transaction.
     // This avoids keeping an interactive transaction open while executing many statements.
     await prisma.$transaction([
-      prisma.$executeRaw`
-        DELETE FROM "Like"
-        WHERE "seedId" IN (
-          SELECT id FROM "Seed" WHERE "authorUsername" = ${username}
-        )
-      `,
-      prisma.$executeRaw`
-        DELETE FROM "Favorite"
-        WHERE "seedId" IN (
-          SELECT id FROM "Seed" WHERE "authorUsername" = ${username}
-        )
-      `,
-      prisma.$executeRaw`
-        DELETE FROM "Report"
-        WHERE "targetSeedId" IN (
-          SELECT id FROM "Seed" WHERE "authorUsername" = ${username}
-        )
-      `,
-      prisma.$executeRaw`
-        DELETE FROM "Seed"
-        WHERE "authorUsername" = ${username}
-      `,
-      prisma.$executeRaw`
-        DELETE FROM "Like"
-        WHERE "userUsername" = ${username}
-      `,
-      prisma.$executeRaw`
-        DELETE FROM "Favorite"
-        WHERE "userUsername" = ${username}
-      `,
-      prisma.$executeRaw`
-        DELETE FROM "Follow"
-        WHERE "followerUsername" = ${username}
-           OR "followingUsername" = ${username}
-      `,
-      prisma.$executeRaw`
-        DELETE FROM "Report"
-        WHERE "reporterUsername" = ${username}
-      `,
-      prisma.$executeRaw`
-        DELETE FROM "Report"
-        WHERE "targetUsername" = ${username}
-      `,
-      prisma.$executeRaw`
-        DELETE FROM "OAuthAccount"
-        WHERE "userUsername" = ${username}
-      `,
-      prisma.$executeRaw`
-        DELETE FROM "ModerationLog"
-        WHERE "moderatorUsername" = ${username}
-      `,
-      prisma.$executeRaw`
-        DELETE FROM "User"
-        WHERE "username" = ${username}
-      `
+      prisma.like.deleteMany({
+        where: { seedId: { in: seedIds } }
+      }),
+      prisma.favorite.deleteMany({
+        where: { seedId: { in: seedIds } }
+      }),
+      prisma.report.deleteMany({
+        where: { targetSeedId: { in: seedIds } }
+      }),
+      prisma.seed.deleteMany({
+        where: { authorUsername: username }
+      }),
+      prisma.like.deleteMany({
+        where: { userUsername: username }
+      }),
+      prisma.favorite.deleteMany({
+        where: { userUsername: username }
+      }),
+      prisma.follow.deleteMany({
+        where: {
+          OR: [
+            { followerUsername: username },
+            { followingUsername: username }
+          ]
+        }
+      }),
+      prisma.report.deleteMany({
+        where: {
+          OR: [
+            { reporterUsername: username },
+            { targetUsername: username }
+          ]
+        }
+      }),
+      prisma.oAuthAccount.deleteMany({
+        where: { userUsername: username }
+      }),
+      prisma.moderationLog.deleteMany({
+        where: { moderatorUsername: username }
+      }),
+      prisma.user.deleteMany({
+        where: { username }
+      })
     ])
 
     // Delete user from Supabase Auth
     try {
-      await supabase.auth.admin.deleteUser(userData.user.id)
+      await supabaseServer.auth.admin.deleteUser(userData.user.id)
     } catch (err) {
       console.error('Failed to delete Supabase user:', err)
       // Continue anyway, database user is already deleted
