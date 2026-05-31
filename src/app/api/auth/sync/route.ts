@@ -3,6 +3,7 @@ import { supabaseServer } from "../../../../lib/supabaseServer"
 import { prisma } from "../../../../lib/prisma"
 import { buildUniqueUsername } from "../../../../lib/seed-domain"
 import { getSupabaseProviders } from "../../../../lib/supabase-auth"
+import { normalizeEmail } from "../../../../lib/auth"
 
 export async function POST(request: Request) {
   try {
@@ -16,8 +17,8 @@ export async function POST(request: Request) {
     if (error || !data?.user) return NextResponse.json({ error: error?.message ?? "failed to get user" }, { status: 401 })
     const user = data.user
 
-    const email = user.email ?? undefined
-    if (persist_oauth_accounts && expected_email && email?.trim().toLowerCase() !== expected_email) {
+    const email = normalizeEmail(user.email)
+    if (persist_oauth_accounts && expected_email && email !== expected_email) {
       return NextResponse.json({ error: "EMAIL_MISMATCH" }, { status: 409 })
     }
     const meta = (user.user_metadata ?? {}) as any

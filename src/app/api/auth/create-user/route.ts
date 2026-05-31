@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '../../../../lib/prisma'
 import { buildUniqueUsername } from '../../../../lib/seed-domain'
+import { normalizeEmail } from '../../../../lib/auth'
 
 export async function POST(request: NextRequest) {
   try {
@@ -20,10 +21,11 @@ export async function POST(request: NextRequest) {
       )
     )
     const normalizedUsername = typeof username === 'string' ? username.trim().toLowerCase() : ''
+    const normalizedEmail = normalizeEmail(email)
     const normalizedProviderAccountId = typeof providerAccountId === 'string' ? providerAccountId.trim() : ''
 
     // リクエスト検証
-    if (!normalizedUsername || !email) {
+    if (!normalizedUsername || !normalizedEmail) {
       return NextResponse.json(
         { error: 'INVALID_INPUT' },
         { status: 400 }
@@ -36,7 +38,7 @@ export async function POST(request: NextRequest) {
 
     // メールアドレスで既存ユーザーを検索（自動名寄せ）
     const existingByEmail = await prisma.user.findUnique({
-      where: { email }
+      where: { email: normalizedEmail }
     })
 
     if (existingByEmail) {
@@ -98,7 +100,7 @@ export async function POST(request: NextRequest) {
     const newUser = await prisma.user.create({
       data: {
         username: candidateUsername,
-        email,
+        email: normalizedEmail,
         avatarUrl: avatarUrl || null
       },
       include: { oauthAccounts: { select: { provider: true } } }
