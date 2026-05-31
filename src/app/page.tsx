@@ -1,9 +1,7 @@
 import { prisma } from '../lib/prisma'
 import SiteShell from '../components/SiteShell'
-import SeedCard from '../components/SeedCard'
 import SeedGrid from '../components/SeedGrid'
 import PlayerRow from '../components/PlayerRow'
-import PlayerCard from '../components/PlayerCard'
 
 // 公開データは ISR を使ってキャッシュして FCP を改善する
 export const revalidate = 60
