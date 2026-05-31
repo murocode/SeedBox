@@ -16,6 +16,51 @@ type AccountMenuProps = {
   loadCurrentUser?: boolean
 }
 
+const ACCOUNT_USER_CACHE_KEY = 'seedbox:account-user'
+
+function readCachedAccountUser(): AccountUser | null {
+  if (typeof window === 'undefined') {
+    return null
+  }
+
+  try {
+    const raw = window.localStorage.getItem(ACCOUNT_USER_CACHE_KEY)
+    if (!raw) {
+      return null
+    }
+
+    const parsed = JSON.parse(raw)
+    if (!parsed || typeof parsed.username !== 'string') {
+      return null
+    }
+
+    return {
+      username: parsed.username,
+      email: typeof parsed.email === 'string' ? parsed.email : null,
+      avatarUrl: typeof parsed.avatarUrl === 'string' ? parsed.avatarUrl : null
+    }
+  } catch {
+    return null
+  }
+}
+
+function writeCachedAccountUser(user: AccountUser | null) {
+  if (typeof window === 'undefined') {
+    return
+  }
+
+  try {
+    if (!user) {
+      window.localStorage.removeItem(ACCOUNT_USER_CACHE_KEY)
+      return
+    }
+
+    window.localStorage.setItem(ACCOUNT_USER_CACHE_KEY, JSON.stringify(user))
+  } catch {
+    // Ignore storage failures; the menu still works without cache.
+  }
+}
+
 export default function AccountMenu({ currentUser, loadCurrentUser = false }: AccountMenuProps) {
   const router = useRouter()
   const [open, setOpen] = useState(false)
@@ -24,43 +69,53 @@ export default function AccountMenu({ currentUser, loadCurrentUser = false }: Ac
 
   useEffect(() => {
     if (!loadCurrentUser || currentUser !== undefined) {
+      if (currentUser !== undefined) {
+        setResolvedUser(currentUser)
+        setLoading(false)
+        writeCachedAccountUser(currentUser)
+      }
       return
     }
 
     let active = true
 
+    const cachedUser = readCachedAccountUser()
+    if (cachedUser) {
+      setResolvedUser(cachedUser)
+      setLoading(false)
+    } else {
+      setLoading(true)
+    }
+
     async function loadUser() {
       try {
-        const { data: sessionData } = await supabase.auth.getSession()
-        const accessToken = sessionData.session?.access_token
-
-        if (!accessToken) {
-          if (active) {
-            setResolvedUser(null)
-          }
-          return
-        }
-
         const response = await fetch('/api/users/me', {
-          headers: {
-            Authorization: `Bearer ${accessToken}`
-          }
+          cache: 'no-store'
         })
 
         if (!response.ok) {
           if (active) {
-            setResolvedUser(null)
+            if (!cachedUser) {
+              setResolvedUser(null)
+            }
+            if (response.status === 401 || response.status === 404) {
+              writeCachedAccountUser(null)
+            }
           }
           return
         }
 
-        const data = await response.json()
+        const data = await response.json().catch(() => ({}))
         if (active) {
-          setResolvedUser(data.user ?? null)
+          const user = data.user ?? null
+          setResolvedUser(user)
+          writeCachedAccountUser(user)
         }
       } catch {
         if (active) {
-          setResolvedUser(null)
+          if (!cachedUser) {
+            setResolvedUser(null)
+          }
         }
       } finally {
         if (active) {
@@ -84,18 +139,20 @@ export default function AccountMenu({ currentUser, loadCurrentUser = false }: Ac
       if (event === 'SIGNED_IN' && session) {
         setLoading(true)
         try {
-          const accessToken = session.access_token
-          if (!accessToken) return
-
           const response = await fetch('/api/users/me', {
-            headers: { Authorization: `Bearer ${accessToken}` }
+            cache: 'no-store'
           })
           if (!response.ok) {
-            setResolvedUser(null)
+            if (response.status === 401 || response.status === 404) {
+              setResolvedUser(null)
+              writeCachedAccountUser(null)
+            }
             return
           }
           const data = await response.json().catch(() => ({}))
-          setResolvedUser(data.user ?? null)
+          const user = data.user ?? null
+          setResolvedUser(user)
+          writeCachedAccountUser(user)
         } catch (e) {
           setResolvedUser(null)
         } finally {
@@ -105,6 +162,7 @@ export default function AccountMenu({ currentUser, loadCurrentUser = false }: Ac
 
       if (event === 'SIGNED_OUT') {
         setResolvedUser(null)
+        writeCachedAccountUser(null)
       }
     })
 
@@ -144,6 +202,7 @@ export default function AccountMenu({ currentUser, loadCurrentUser = false }: Ac
   async function handleLogout() {
     setOpen(false)
     await supabase.auth.signOut()
+    writeCachedAccountUser(null)
     // Clear server-side SSR cookie
     try {
       await fetch('/api/auth/logout', { method: 'POST' })
