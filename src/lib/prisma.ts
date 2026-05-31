@@ -116,7 +116,7 @@ const schemaBootstrapStatements = [
     "fortressTypes" TEXT[] NOT NULL,
     "fortressToNetherDist" "Distance",
     "portalRoomEase" "PortalEase",
-    "zeroCycle" "ZeroCycleDifficulty" NOT NULL,
+    "zeroCycle" "ZeroCycleDifficulty",
     "authorUsername" TEXT NOT NULL,
     CONSTRAINT "Seed_pkey" PRIMARY KEY ("id")
   );`,
@@ -204,6 +204,19 @@ const schemaMaintenanceStatements = [
         AND is_nullable = 'NO'
     ) THEN
       ALTER TABLE "Seed" ALTER COLUMN "portalRoomEase" DROP NOT NULL;
+    END IF;
+  END $$;`
+  ,
+  `DO $$ BEGIN
+    IF EXISTS (
+      SELECT 1
+      FROM information_schema.columns
+      WHERE table_schema = 'public'
+        AND table_name = 'Seed'
+        AND column_name = 'zeroCycle'
+        AND is_nullable = 'NO'
+    ) THEN
+      ALTER TABLE "Seed" ALTER COLUMN "zeroCycle" DROP NOT NULL;
     END IF;
   END $$;`
 ]
