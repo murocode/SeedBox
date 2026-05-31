@@ -3,6 +3,7 @@ import { cookies } from 'next/headers'
 import { prisma } from '../../../../lib/prisma'
 import { resolveCurrentUser } from '../../../../lib/auth'
 import { validateUrl, validateBio, validateComment } from '../../../../lib/validation'
+import { ACCOUNT_USER_COOKIE_NAME, serializeAccountCookieUser } from '../../../../lib/account-cookie'
 
 async function resolveAccessToken(request: NextRequest) {
   const authorization = request.headers.get('authorization')
@@ -57,7 +58,22 @@ export async function GET(request: NextRequest) {
       oauthAccounts: user.oauthAccounts ?? []
     }
 
-    return NextResponse.json({ user: safeUser })
+    const response = NextResponse.json({ user: safeUser })
+    const secure = process.env.NODE_ENV === 'production'
+    response.cookies.set(ACCOUNT_USER_COOKIE_NAME, serializeAccountCookieUser({
+      username: safeUser.username,
+      email: safeUser.email,
+      avatarUrl: safeUser.avatarUrl,
+      role: safeUser.role
+    }), {
+      httpOnly: false,
+      path: '/',
+      sameSite: 'lax',
+      secure,
+      maxAge: 60 * 60 * 24 * 7
+    })
+
+    return response
   } catch (error) {
     console.error('Get user error:', error)
     return NextResponse.json(
@@ -122,6 +138,7 @@ export async function PATCH(request: NextRequest) {
     const safeUser = {
       username: user.username,
       email: user.email,
+      role: currentUser.role,
       bio: user.bio,
       youtubeUrl: user.youtubeUrl,
       xUrl: user.xUrl,
@@ -132,7 +149,22 @@ export async function PATCH(request: NextRequest) {
       oauthAccounts: user.oauthAccounts ?? []
     }
 
-    return NextResponse.json({ user: safeUser })
+    const response = NextResponse.json({ user: safeUser })
+    const secure = process.env.NODE_ENV === 'production'
+    response.cookies.set(ACCOUNT_USER_COOKIE_NAME, serializeAccountCookieUser({
+      username: safeUser.username,
+      email: safeUser.email,
+      avatarUrl: safeUser.avatarUrl,
+      role: safeUser.role
+    }), {
+      httpOnly: false,
+      path: '/',
+      sameSite: 'lax',
+      secure,
+      maxAge: 60 * 60 * 24 * 7
+    })
+
+    return response
   } catch (error) {
     console.error('Update user error:', error)
     return NextResponse.json(

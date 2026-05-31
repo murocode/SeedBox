@@ -3,7 +3,8 @@ import { supabaseServer } from "../../../../lib/supabaseServer"
 import { prisma } from "../../../../lib/prisma"
 import { buildUniqueUsername } from "../../../../lib/seed-domain"
 import { getSupabaseProviders } from "../../../../lib/supabase-auth"
-import { findUserByEmail, normalizeEmail } from "../../../../lib/auth"
+import { findUserByEmail, normalizeEmail, resolveRole } from "../../../../lib/auth"
+import { ACCOUNT_USER_COOKIE_NAME, serializeAccountCookieUser } from "../../../../lib/account-cookie"
 
 export async function POST(request: Request) {
   try {
@@ -104,6 +105,19 @@ export async function POST(request: Request) {
     const secure = process.env.NODE_ENV === 'production'
     res.cookies.set('sb-access-token', access_token, {
       httpOnly: true,
+      path: '/',
+      sameSite: 'lax',
+      secure,
+      maxAge: 60 * 60 * 24 * 7 // 7 days
+    })
+
+    res.cookies.set(ACCOUNT_USER_COOKIE_NAME, serializeAccountCookieUser({
+      username: dbUser.username,
+      email: dbUser.email,
+      avatarUrl: dbUser.avatarUrl,
+      role: resolveRole(dbUser.email)
+    }), {
+      httpOnly: false,
       path: '/',
       sameSite: 'lax',
       secure,

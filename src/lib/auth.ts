@@ -40,7 +40,7 @@ function parseEmailList(value: string | undefined) {
   )
 }
 
-function resolveRole(email?: string | null): UserRole {
+export function resolveRole(email?: string | null): UserRole {
   if (!email) {
     return 'USER'
   }
