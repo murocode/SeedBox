@@ -7,6 +7,8 @@ import SiteNavClient from './SiteNavClient'
 import MobileNav from './MobileNav'
 import PageHeader from './PageHeader'
 import PostButton from './PostButton'
+import { cookies } from 'next/headers'
+import { ACCOUNT_USER_COOKIE_NAME, parseAccountCookieUser } from '../lib/account-cookie'
 
 type NavItem = { href: string; label: string }
 
@@ -35,11 +37,9 @@ export default async function SiteShell({
   icon?: string
   layout?: 'page' | 'hero'
 }) {
-  // Avoid resolving the current user on the server for every page render —
-  // client-side `AccountMenu` will load user data when needed. This
-  // significantly reduces server-side latency for public pages.
-  const canModerate = false
-  const currentUser = undefined
+  const cookieStore = await cookies()
+  const currentUser = parseAccountCookieUser(cookieStore.get(ACCOUNT_USER_COOKIE_NAME)?.value) ?? undefined
+  const canModerate = currentUser?.role === 'MODERATOR' || currentUser?.role === 'ADMIN'
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -66,12 +66,12 @@ export default async function SiteShell({
             ) : null}
             <div className="flex items-center gap-3">
               <PostButton className="rounded-full bg-primary-600 px-3 py-2 text-sm font-medium text-white transition hover:bg-primary-700" />
-              <AccountMenu loadCurrentUser={true} />
+              <AccountMenu currentUser={currentUser} loadCurrentUser={currentUser === undefined} />
             </div>
           </div>
 
           <div className="md:hidden flex items-center gap-2">
-            <MobileNav />
+            <MobileNav currentUser={currentUser} canModerate={canModerate} />
           </div>
         </div>
       </header>

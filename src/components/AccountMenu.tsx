@@ -4,11 +4,13 @@ import React, { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useRouter } from 'next/navigation'
 import { supabase } from '../lib/supabaseClient'
+import { readAccountCookieUserFromDocument } from '../lib/account-cookie'
 
 type AccountUser = {
   username: string
   email?: string | null
   avatarUrl?: string | null
+  role?: 'USER' | 'MODERATOR' | 'ADMIN'
 }
 
 type AccountMenuProps = {
@@ -79,7 +81,7 @@ export default function AccountMenu({ currentUser, loadCurrentUser = false }: Ac
 
     let active = true
 
-    const cachedUser = readCachedAccountUser()
+    const cachedUser = readCachedAccountUser() ?? readAccountCookieUserFromDocument()
     if (cachedUser) {
       setResolvedUser(cachedUser)
       setLoading(false)
