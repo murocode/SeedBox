@@ -91,7 +91,7 @@ export default function UsernameSetupPage() {
           username,
           email: session.user.email,
           avatarUrl,
-          provider: getSupabaseProviders(session.user)[0],
+          providers: getSupabaseProviders(session.user),
           providerAccountId: session.user.id
         })
       })
