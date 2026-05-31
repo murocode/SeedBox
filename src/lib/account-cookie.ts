@@ -4,7 +4,7 @@ export type AccountCookieUser = {
   username: string
   email?: string | null
   avatarUrl?: string | null
-  role?: 'USER' | 'MODERATOR' | 'ADMIN' | null
+  role?: 'USER' | 'MODERATOR' | 'ADMIN'
 }
 
 function sanitizeAccountCookieUser(input: unknown): AccountCookieUser | null {
@@ -19,7 +19,7 @@ function sanitizeAccountCookieUser(input: unknown): AccountCookieUser | null {
   }
 
   const roleValue = value.role
-  const role = roleValue === 'USER' || roleValue === 'MODERATOR' || roleValue === 'ADMIN' ? roleValue : null
+  const role = roleValue === 'USER' || roleValue === 'MODERATOR' || roleValue === 'ADMIN' ? roleValue : undefined
 
   return {
     username,
