@@ -6,13 +6,13 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
     const { username, email, avatarUrl, providerAccountId } = body
-    const providers = Array.isArray(body?.providers)
+    const providers: unknown[] = Array.isArray(body?.providers)
       ? body.providers
       : body?.provider
         ? [body.provider]
         : []
 
-    const normalizedProviders = Array.from(
+    const normalizedProviders: string[] = Array.from(
       new Set(
         providers
           .map((value: unknown) => typeof value === 'string' ? value.trim() : '')
