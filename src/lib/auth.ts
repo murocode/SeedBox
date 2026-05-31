@@ -6,6 +6,10 @@ import { getSupabaseProviders } from './supabase-auth'
 
 export type UserRole = 'USER' | 'MODERATOR' | 'ADMIN'
 
+export function normalizeEmail(email?: string | null) {
+  return typeof email === 'string' ? email.trim().toLowerCase() : ''
+}
+
 function parseEmailList(value: string | undefined) {
   return new Set(
     (value ?? '')
@@ -43,7 +47,7 @@ export async function resolveCurrentUser(accessToken?: string | null) {
     return null
   }
 
-  const email = data.user.email ?? null
+  const email = normalizeEmail(data.user.email)
   if (email) {
     const user = await prisma.user.findUnique({ where: { email } })
     if (user) {
