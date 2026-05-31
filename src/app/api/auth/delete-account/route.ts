@@ -38,80 +38,65 @@ export async function DELETE(request: NextRequest) {
 
     const username = user.username
 
-    // Delete all related data in a transaction
-    await prisma.$transaction(async tx => {
-      const seedIds = (await tx.seed.findMany({
-        where: { authorUsername: username },
-        select: { id: true }
-      })).map(seed => seed.id)
-
-      await tx.like.deleteMany({
-        where: {
-          seed: {
-            authorUsername: username
-          }
-        }
-      })
-
-      await tx.favorite.deleteMany({
-        where: {
-          seed: {
-            authorUsername: username
-          }
-        }
-      })
-
-      if (seedIds.length > 0) {
-        await tx.report.deleteMany({
-          where: {
-            targetSeedId: {
-              in: seedIds
-            }
-          }
-        })
-      }
-
-      await tx.seed.deleteMany({
-        where: { authorUsername: username }
-      })
-
-      await tx.like.deleteMany({
-        where: { userUsername: username }
-      })
-
-      await tx.favorite.deleteMany({
-        where: { userUsername: username }
-      })
-
-      await tx.follow.deleteMany({
-        where: {
-          OR: [
-            { followerUsername: username },
-            { followingUsername: username }
-          ]
-        }
-      })
-
-      await tx.report.deleteMany({
-        where: { reporterUsername: username }
-      })
-
-      await tx.report.deleteMany({
-        where: { targetUsername: username }
-      })
-
-      await tx.oAuthAccount.deleteMany({
-        where: { userUsername: username }
-      })
-
-      await tx.moderationLog.deleteMany({
-        where: { moderatorUsername: username }
-      })
-
-      await tx.user.delete({
-        where: { username }
-      })
-    })
+    // Delete all related data in a single batch transaction.
+    // Raw deletes avoid the long-lived interactive transaction that could close mid-flight on large accounts.
+    await prisma.$transaction([
+      prisma.$executeRaw`
+        DELETE FROM "Like"
+        WHERE "seedId" IN (
+          SELECT id FROM "Seed" WHERE "authorUsername" = ${username}
+        )
+      `,
+      prisma.$executeRaw`
+        DELETE FROM "Favorite"
+        WHERE "seedId" IN (
+          SELECT id FROM "Seed" WHERE "authorUsername" = ${username}
+        )
+      `,
+      prisma.$executeRaw`
+        DELETE FROM "Report"
+        WHERE "targetSeedId" IN (
+          SELECT id FROM "Seed" WHERE "authorUsername" = ${username}
+        )
+      `,
+      prisma.$executeRaw`
+        DELETE FROM "Seed"
+        WHERE "authorUsername" = ${username}
+      `,
+      prisma.$executeRaw`
+        DELETE FROM "Like"
+        WHERE "userUsername" = ${username}
+      `,
+      prisma.$executeRaw`
+        DELETE FROM "Favorite"
+        WHERE "userUsername" = ${username}
+      `,
+      prisma.$executeRaw`
+        DELETE FROM "Follow"
+        WHERE "followerUsername" = ${username}
+           OR "followingUsername" = ${username}
+      `,
+      prisma.$executeRaw`
+        DELETE FROM "Report"
+        WHERE "reporterUsername" = ${username}
+      `,
+      prisma.$executeRaw`
+        DELETE FROM "Report"
+        WHERE "targetUsername" = ${username}
+      `,
+      prisma.$executeRaw`
+        DELETE FROM "OAuthAccount"
+        WHERE "userUsername" = ${username}
+      `,
+      prisma.$executeRaw`
+        DELETE FROM "ModerationLog"
+        WHERE "moderatorUsername" = ${username}
+      `,
+      prisma.$executeRaw`
+        DELETE FROM "User"
+        WHERE "username" = ${username}
+      `
+    ])
 
     // Delete user from Supabase Auth
     try {
