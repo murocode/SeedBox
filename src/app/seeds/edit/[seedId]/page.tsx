@@ -278,9 +278,7 @@ export default function SeedEditPage() {
       }
 
       setSubmitSuccess('編集しました')
-      setTimeout(() => {
-        router.push(`/seeds/${seed?.author.username}/${seed?.seedValue}`)
-      }, 1000)
+      router.push(`/seeds/${seed?.author.username}/${seed?.seedValue}`)
     } catch (error: any) {
       setSubmitError(error?.message || '編集に失敗しました')
     } finally {
@@ -330,7 +328,7 @@ export default function SeedEditPage() {
               <textarea
                 value={form.comment}
                 onChange={e => handleInputChange('comment', e.target.value)}
-                placeholder="シードについての詳細な説明（Markdown対応・1000文字以内）"
+                placeholder="シードについての詳細な説明（1000文字以内）"
                 maxLength={1000}
                 className="w-full rounded-lg border px-3 py-2 min-h-28 focus:outline-none focus:ring-2 focus:ring-primary-600"
               />

@@ -63,20 +63,20 @@ export async function PATCH(request: NextRequest) {
 
         // BANの場合、指定されたシードを削除
         if (removeSeeds && Array.isArray(removeSeeds)) {
-          await prisma.$transaction(async tx => {
-            await tx.like.deleteMany({
+          await prisma.$transaction([
+            prisma.like.deleteMany({
               where: { seedId: { in: removeSeeds } }
-            })
-            await tx.favorite.deleteMany({
+            }),
+            prisma.favorite.deleteMany({
               where: { seedId: { in: removeSeeds } }
-            })
-            await tx.report.deleteMany({
+            }),
+            prisma.report.deleteMany({
               where: { targetSeedId: { in: removeSeeds } }
-            })
-            await tx.seed.deleteMany({
+            }),
+            prisma.seed.deleteMany({
               where: { id: { in: removeSeeds } }
             })
-          })
+          ])
         }
       }
       await prisma.report.delete({ where: { id: reportId } })
