@@ -114,7 +114,7 @@ const schemaBootstrapStatements = [
     "netherEase" "Ease" NOT NULL,
     "fortressDistance" "Distance" NOT NULL,
     "fortressTypes" TEXT[] NOT NULL,
-    "fortressToNetherDist" "Distance" NOT NULL,
+    "fortressToNetherDist" "Distance",
     "portalRoomEase" "PortalEase" NOT NULL,
     "zeroCycle" "ZeroCycleDifficulty" NOT NULL,
     "authorUsername" TEXT NOT NULL,
@@ -180,6 +180,18 @@ const schemaMaintenanceStatements = [
         AND data_type <> 'double precision'
     ) THEN
       ALTER TABLE "User" ALTER COLUMN "pbTime" TYPE DOUBLE PRECISION USING "pbTime"::DOUBLE PRECISION;
+    END IF;
+  END $$;`,
+  `DO $$ BEGIN
+    IF EXISTS (
+      SELECT 1
+      FROM information_schema.columns
+      WHERE table_schema = 'public'
+        AND table_name = 'Seed'
+        AND column_name = 'fortressToNetherDist'
+        AND is_nullable = 'NO'
+    ) THEN
+      ALTER TABLE "Seed" ALTER COLUMN "fortressToNetherDist" DROP NOT NULL;
     END IF;
   END $$;`
 ]
