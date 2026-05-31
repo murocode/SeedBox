@@ -52,7 +52,7 @@ export default async function SiteShell({
                 <div className="text-2xl font-bold text-primary-600">
                   Seed<span className="text-[#2d2d2d]">Box</span>
                 </div>
-                <div className="text-sm text-slate-500">for Minecraft RSG</div>
+                <div className="text-sm text-slate-500">for Minecraft Speedrunning</div>
               </div>
             </Link>
           </div>
