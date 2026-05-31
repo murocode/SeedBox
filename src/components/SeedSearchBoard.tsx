@@ -3,6 +3,7 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import SeedGrid from './SeedGrid'
+import SeedGridSkeleton from './SeedGridSkeleton'
 import Accordion from './Accordion'
 import type { DistanceValue, EaseValue, PortalEaseValue, ZeroCycleValue } from '../lib/seed-domain'
 
@@ -500,10 +501,10 @@ export default function SeedSearchBoard() {
 
         <div>
           {loading ? (
-            <div className="rounded-2xl bg-white border shadow-sm p-8 text-center text-slate-500">
-              読み込み中...
-            </div>
-          ) : results.length > 0 ? (
+              <div className="rounded-2xl bg-white border shadow-sm p-4">
+                <SeedGridSkeleton count={6} />
+              </div>
+            ) : results.length > 0 ? (
             <SeedGrid
               seeds={results}
             />
