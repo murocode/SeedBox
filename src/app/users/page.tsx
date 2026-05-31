@@ -17,6 +17,7 @@ type SearchParams = {
   pbMax?: string
   followingOnly?: string
   orderBy?: string
+  page?: string
 }
 
 function normalizeUsernameQuery(value: string) {
@@ -115,17 +116,25 @@ export default async function UsersPage({ searchParams }: { searchParams?: Searc
     }
   }
 
-  const users = await prisma.user.findMany({
+  const pageNum = Math.max(1, Number(sp?.page ? Number(sp.page) : 1) || 1)
+  const take = 24
+  const skip = (pageNum - 1) * take
+
+  const [users, total] = await Promise.all([
+    prisma.user.findMany({
     where,
     orderBy:
       orderBy === 'pbTime'
         ? [{ pbTime: { sort: 'asc', nulls: 'last' } }, { username: 'asc' }]
         : [{ username: 'asc' }],
-    take: 24,
+    skip,
+    take,
     include: {
       _count: { select: { seeds: true, followers: true } }
     }
-  })
+  }),
+    prisma.user.count({ where })
+  ])
 
   const activeFilterLabels: string[] = []
   if (normalizedQuery) activeFilterLabels.push(`ユーザー名: ${normalizedQuery}`)
@@ -190,7 +199,7 @@ export default async function UsersPage({ searchParams }: { searchParams?: Searc
         <section className="space-y-4">
           <div className="flex flex-wrap items-center justify-between gap-3 text-sm">
             <div className="font-semibold text-slate-900">
-              検索結果 <span className="text-primary-600">{users.length}</span> 件
+              検索結果 <span className="text-primary-600">{total}</span> 件
             </div>
 
             <UsersSearchQuickControls followingOnly={followingOnly} orderBy={orderBy} />
@@ -200,6 +209,50 @@ export default async function UsersPage({ searchParams }: { searchParams?: Searc
 
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             <UsersListClient users={users} />
+          </div>
+
+          <div className="mt-4 flex items-center justify-center gap-3">
+            <div className="flex items-center gap-2">
+              {pageNum > 1 ? (
+                <Link
+                  href={`/users?${new URLSearchParams({
+                    ...Object.fromEntries(Object.entries(sp ?? {}).filter(([k, v]) => v !== undefined && k !== 'page')),
+                    page: String(pageNum - 1)
+                  })}`}
+                  className="bg-white border border-slate-200 text-slate-700 rounded-md w-6 h-6 flex items-center justify-center mr-1 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary-600"
+                  aria-label="前のページへ移動"
+                >
+                  <i className="fa-solid fa-chevron-left text-xs" aria-hidden />
+                  <span className="sr-only">前へ</span>
+                </Link>
+              ) : (
+                <button className="bg-white border border-slate-200 text-slate-700 rounded-md w-6 h-6 flex items-center justify-center mr-1 opacity-50" disabled aria-label="前のページへ移動">
+                  <i className="fa-solid fa-chevron-left text-xs" aria-hidden />
+                  <span className="sr-only">前へ</span>
+                </button>
+              )}
+
+              <span className="text-sm text-slate-600">{pageNum} / {Math.max(1, Math.ceil(total / take))}</span>
+
+              {pageNum < Math.ceil(total / take) ? (
+                <Link
+                  href={`/users?${new URLSearchParams({
+                    ...Object.fromEntries(Object.entries(sp ?? {}).filter(([k, v]) => v !== undefined && k !== 'page')),
+                    page: String(pageNum + 1)
+                  })}`}
+                  className="bg-white border border-slate-200 text-slate-700 rounded-md w-6 h-6 flex items-center justify-center ml-1 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary-600"
+                  aria-label="次のページへ移動"
+                >
+                  <i className="fa-solid fa-chevron-right text-xs" aria-hidden />
+                  <span className="sr-only">次へ</span>
+                </Link>
+              ) : (
+                <button className="bg-white border border-slate-200 text-slate-700 rounded-md w-6 h-6 flex items-center justify-center ml-1 opacity-50" disabled aria-label="次のページへ移動">
+                  <i className="fa-solid fa-chevron-right text-xs" aria-hidden />
+                  <span className="sr-only">次へ</span>
+                </button>
+              )}
+            </div>
           </div>
         </section>
       </div>
