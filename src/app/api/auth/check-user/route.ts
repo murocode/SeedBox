@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '../../../../lib/prisma'
-import { normalizeEmail } from '../../../../lib/auth'
+import { findUserByEmail, normalizeEmail } from '../../../../lib/auth'
 
 export async function POST(request: NextRequest) {
   try {
@@ -14,7 +13,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const user = await prisma.user.findUnique({ where: { email: normalizedEmail } })
+    const user = await findUserByEmail(normalizedEmail)
 
     // only expose existence flag to clients; do not return internal IDs
     return NextResponse.json({ exists: !!user })

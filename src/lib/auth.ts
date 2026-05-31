@@ -1,5 +1,6 @@
 import 'server-only'
 
+import { Prisma } from '@prisma/client'
 import { prisma } from './prisma'
 import { supabaseServer } from './supabaseServer'
 import { getSupabaseProviders } from './supabase-auth'
@@ -8,6 +9,26 @@ export type UserRole = 'USER' | 'MODERATOR' | 'ADMIN'
 
 export function normalizeEmail(email?: string | null) {
   return typeof email === 'string' ? email.trim().toLowerCase() : ''
+}
+
+export async function findUserByEmail(email?: string | null) {
+  const normalizedEmail = normalizeEmail(email)
+  if (!normalizedEmail) {
+    return null
+  }
+
+  return prisma.user.findFirst({
+    where: {
+      email: {
+        equals: normalizedEmail,
+        mode: 'insensitive'
+      }
+    }
+  })
+}
+
+export function isPrismaUniqueConstraintError(error: unknown) {
+  return error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002'
 }
 
 function parseEmailList(value: string | undefined) {
@@ -49,7 +70,7 @@ export async function resolveCurrentUser(accessToken?: string | null) {
 
   const email = normalizeEmail(data.user.email)
   if (email) {
-    const user = await prisma.user.findUnique({ where: { email } })
+    const user = await findUserByEmail(email)
     if (user) {
       return { ...user, role: resolveRole(user.email) }
     }
