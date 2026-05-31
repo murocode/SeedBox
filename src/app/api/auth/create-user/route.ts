@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '../../../../lib/prisma'
 import { buildUniqueUsername } from '../../../../lib/seed-domain'
-import { normalizeEmail } from '../../../../lib/auth'
+import { findUserByEmail, isPrismaUniqueConstraintError, normalizeEmail } from '../../../../lib/auth'
 
 export async function POST(request: NextRequest) {
   try {
@@ -37,9 +37,7 @@ export async function POST(request: NextRequest) {
     const accessToken = authorization?.startsWith('Bearer ') ? authorization.slice('Bearer '.length).trim() : null
 
     // メールアドレスで既存ユーザーを検索（自動名寄せ）
-    const existingByEmail = await prisma.user.findUnique({
-      where: { email: normalizedEmail }
-    })
+    const existingByEmail = await findUserByEmail(normalizedEmail)
 
     if (existingByEmail) {
       // 既存ユーザーがいる場合、OAuthアカウント連携を追加
@@ -97,14 +95,48 @@ export async function POST(request: NextRequest) {
     }
 
     // 新規ユーザー作成
-    const newUser = await prisma.user.create({
-      data: {
-        username: candidateUsername,
-        email: normalizedEmail,
-        avatarUrl: avatarUrl || null
-      },
-      include: { oauthAccounts: { select: { provider: true } } }
-    })
+    let newUser
+    try {
+      newUser = await prisma.user.create({
+        data: {
+          username: candidateUsername,
+          email: normalizedEmail,
+          avatarUrl: avatarUrl || null
+        },
+        include: { oauthAccounts: { select: { provider: true } } }
+      })
+    } catch (error) {
+      if (isPrismaUniqueConstraintError(error)) {
+        const conflictedByEmail = await findUserByEmail(normalizedEmail)
+        if (conflictedByEmail) {
+          const updated = await prisma.user.update({
+            where: { username: conflictedByEmail.username },
+            data: {
+              avatarUrl: avatarUrl || conflictedByEmail.avatarUrl
+            }
+          })
+
+          const safeUpdated = {
+            username: updated.username,
+            email: updated.email,
+            avatarUrl: updated.avatarUrl,
+            oauthAccounts: (updated as any).oauthAccounts ?? []
+          }
+
+          return NextResponse.json({ user: safeUpdated, isNewUser: false })
+        }
+
+        return NextResponse.json(
+          {
+            error: 'USERNAME_TAKEN',
+            suggestedUsername: buildUniqueUsername(normalizedUsername)
+          },
+          { status: 409 }
+        )
+      }
+
+      throw error
+    }
 
     if (normalizedProviderAccountId && normalizedProviders.length > 0) {
       await Promise.all(

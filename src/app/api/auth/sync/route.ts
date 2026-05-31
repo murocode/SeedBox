@@ -3,7 +3,7 @@ import { supabaseServer } from "../../../../lib/supabaseServer"
 import { prisma } from "../../../../lib/prisma"
 import { buildUniqueUsername } from "../../../../lib/seed-domain"
 import { getSupabaseProviders } from "../../../../lib/supabase-auth"
-import { normalizeEmail } from "../../../../lib/auth"
+import { findUserByEmail, normalizeEmail } from "../../../../lib/auth"
 
 export async function POST(request: Request) {
   try {
@@ -30,7 +30,7 @@ export async function POST(request: Request) {
 
     let dbUser: any
     if (email) {
-      const existingByEmail = await prisma.user.findUnique({ where: { email } })
+      const existingByEmail = await findUserByEmail(email)
       if (existingByEmail) {
         // Keep the app username stable after initial setup.
         dbUser = await prisma.user.update({
