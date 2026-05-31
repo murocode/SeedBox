@@ -4,7 +4,21 @@ import { buildUniqueUsername } from '../../../../lib/seed-domain'
 
 export async function POST(request: NextRequest) {
   try {
-    const { username, email, avatarUrl, provider, providerAccountId } = await request.json()
+    const body = await request.json()
+    const { username, email, avatarUrl, providerAccountId } = body
+    const providers = Array.isArray(body?.providers)
+      ? body.providers
+      : body?.provider
+        ? [body.provider]
+        : []
+
+    const normalizedProviders = Array.from(
+      new Set(
+        providers
+          .map((value: unknown) => typeof value === 'string' ? value.trim() : '')
+          .filter((value: string): value is string => !!value)
+      )
+    )
     const normalizedUsername = typeof username === 'string' ? username.trim().toLowerCase() : ''
 
     // リクエスト検証
@@ -26,20 +40,20 @@ export async function POST(request: NextRequest) {
 
     if (existingByEmail) {
       // 既存ユーザーがいる場合、OAuthアカウント連携を追加
-      if (provider && providerAccountId) {
-        const existingOAuth = await prisma.oAuthAccount.findUnique({
-          where: { provider_providerAccountId: { provider, providerAccountId } }
-        }).catch(() => null)
-
-        if (!existingOAuth) {
-          await prisma.oAuthAccount.create({
-            data: {
-              provider,
-              providerAccountId,
-              userUsername: existingByEmail.username
-            }
-          })
-        }
+      if (providerAccountId && normalizedProviders.length > 0) {
+        await Promise.all(
+          normalizedProviders.map(provider =>
+            prisma.oAuthAccount.upsert({
+              where: { provider_providerAccountId: { provider, providerAccountId } },
+              update: { userUsername: existingByEmail.username },
+              create: {
+                provider,
+                providerAccountId,
+                userUsername: existingByEmail.username
+              }
+            }).catch(() => null)
+          )
+        )
       }
 
       const updated = await prisma.user.update({
@@ -61,7 +75,6 @@ export async function POST(request: NextRequest) {
 
     // 新規ユーザーの場合、ユーザー名の重複チェック
     let candidateUsername = normalizedUsername
-    let collisionCount = 0
 
     const existingUser = await prisma.user.findUnique({
       where: { username: candidateUsername }
@@ -85,16 +98,26 @@ export async function POST(request: NextRequest) {
       data: {
         username: candidateUsername,
         email,
-        avatarUrl: avatarUrl || null,
-        oauthAccounts: provider && providerAccountId ? {
-          create: {
-            provider,
-            providerAccountId
-          }
-        } : undefined
+        avatarUrl: avatarUrl || null
       },
       include: { oauthAccounts: { select: { provider: true } } }
     })
+
+    if (providerAccountId && normalizedProviders.length > 0) {
+      await Promise.all(
+        normalizedProviders.map(provider =>
+          prisma.oAuthAccount.upsert({
+            where: { provider_providerAccountId: { provider, providerAccountId } },
+            update: { userUsername: newUser.username },
+            create: {
+              provider,
+              providerAccountId,
+              userUsername: newUser.username
+            }
+          }).catch(() => null)
+        )
+      )
+    }
 
     const safeNewUser = {
       username: newUser.username,

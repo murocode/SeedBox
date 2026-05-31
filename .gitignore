@@ -52,13 +52,18 @@ coverage/
 
 # Supabase
 .supabase/
+# Supabase local metadata and caches (do not commit local project state)
+supabase/.temp/
+supabase/.cache/
+supabase/.local/
+supabase/.env
+supabase/.env.local
+supabase/linked-project.json
 
 # Temporary
 tmp/
 temp/
 *.tmp
 
-# Ignore build artifacts from common tools
-dist/
-build/
+
 
