@@ -38,65 +38,65 @@ export async function DELETE(request: NextRequest) {
 
     const username = user.username
 
-    // Delete all related data in a single batch transaction.
-    // Raw deletes avoid the long-lived interactive transaction that could close mid-flight on large accounts.
-    await prisma.$transaction([
-      prisma.$executeRaw`
+    // Delete all related data in a single interactive transaction.
+    // This keeps the raw deletes atomic without relying on batch-array promise typing.
+    await prisma.$transaction(async tx => {
+      await tx.$executeRaw`
         DELETE FROM "Like"
         WHERE "seedId" IN (
           SELECT id FROM "Seed" WHERE "authorUsername" = ${username}
         )
-      `,
-      prisma.$executeRaw`
+      `
+      await tx.$executeRaw`
         DELETE FROM "Favorite"
         WHERE "seedId" IN (
           SELECT id FROM "Seed" WHERE "authorUsername" = ${username}
         )
-      `,
-      prisma.$executeRaw`
+      `
+      await tx.$executeRaw`
         DELETE FROM "Report"
         WHERE "targetSeedId" IN (
           SELECT id FROM "Seed" WHERE "authorUsername" = ${username}
         )
-      `,
-      prisma.$executeRaw`
+      `
+      await tx.$executeRaw`
         DELETE FROM "Seed"
         WHERE "authorUsername" = ${username}
-      `,
-      prisma.$executeRaw`
+      `
+      await tx.$executeRaw`
         DELETE FROM "Like"
         WHERE "userUsername" = ${username}
-      `,
-      prisma.$executeRaw`
+      `
+      await tx.$executeRaw`
         DELETE FROM "Favorite"
         WHERE "userUsername" = ${username}
-      `,
-      prisma.$executeRaw`
+      `
+      await tx.$executeRaw`
         DELETE FROM "Follow"
         WHERE "followerUsername" = ${username}
            OR "followingUsername" = ${username}
-      `,
-      prisma.$executeRaw`
+      `
+      await tx.$executeRaw`
         DELETE FROM "Report"
         WHERE "reporterUsername" = ${username}
-      `,
-      prisma.$executeRaw`
+      `
+      await tx.$executeRaw`
         DELETE FROM "Report"
         WHERE "targetUsername" = ${username}
-      `,
-      prisma.$executeRaw`
+      `
+      await tx.$executeRaw`
         DELETE FROM "OAuthAccount"
         WHERE "userUsername" = ${username}
-      `,
-      prisma.$executeRaw`
+      `
+      await tx.$executeRaw`
         DELETE FROM "ModerationLog"
         WHERE "moderatorUsername" = ${username}
-      `,
-      prisma.$executeRaw`
+      `
+      await tx.$executeRaw`
         DELETE FROM "User"
         WHERE "username" = ${username}
       `
-    ])
+    })
 
     // Delete user from Supabase Auth
     try {
