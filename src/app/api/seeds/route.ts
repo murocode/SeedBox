@@ -166,6 +166,9 @@ export async function GET(request: NextRequest) {
       return NextResponse.json(resp)
     }
 
+    // 総件数を取得してページング情報を返す
+    const total = await prisma.seed.count({ where })
+
     const seeds = await prisma.seed.findMany({
       where,
       include,
@@ -174,7 +177,7 @@ export async function GET(request: NextRequest) {
       orderBy
     })
 
-    const resp = { seeds, total: seeds.length, take, skip }
+    const resp = { seeds, total, take, skip }
     if (!accessToken && !isFollowingOnly) await cacheSet(cacheKey, resp, cacheTtl)
     return NextResponse.json(resp)
   } catch (err) {

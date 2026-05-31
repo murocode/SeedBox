@@ -2,6 +2,7 @@
 
 import React, { useEffect, useMemo, useState } from 'react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
+import Link from 'next/link'
 import SeedGrid from './SeedGrid'
 import SeedGridSkeleton from './SeedGridSkeleton'
 import Accordion from './Accordion'
@@ -98,10 +99,12 @@ export default function SeedSearchBoard() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const pathname = usePathname()
+  const pageNum = Math.max(1, Number(searchParams.get('page') || '1') || 1)
   const [filters, setFilters] = useState<FilterState>(() => readState(searchParams))
   const [results, setResults] = useState<Seed[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [total, setTotal] = useState(0)
 
   const queryString = useMemo(() => {
     const params = new URLSearchParams()
@@ -124,7 +127,11 @@ export default function SeedSearchBoard() {
       setError('')
 
       try {
-        const response = await fetch(`/api/seeds${queryString ? `?${queryString}` : ''}`, {
+        const take = 24
+        const skip = (pageNum - 1) * take
+
+        const sep = queryString ? '&' : '?'
+        const response = await fetch(`/api/seeds${queryString ? `?${queryString}` : ''}${sep}limit=${take}&offset=${skip}`, {
           signal: controller.signal
         })
 
@@ -134,6 +141,7 @@ export default function SeedSearchBoard() {
 
         const data = await response.json()
         setResults(Array.isArray(data.seeds) ? data.seeds : [])
+        setTotal(typeof data.total === 'number' ? data.total : (Array.isArray(data.seeds) ? data.seeds.length : 0))
       } catch (fetchError: any) {
         if (fetchError?.name === 'AbortError') return
         console.error(fetchError)
@@ -148,7 +156,7 @@ export default function SeedSearchBoard() {
 
     loadSeeds()
     return () => controller.abort()
-  }, [queryString])
+  }, [queryString, pageNum])
 
   useEffect(() => {
     setFilters(readState(searchParams))
@@ -514,6 +522,54 @@ export default function SeedSearchBoard() {
               <p className="text-sm mt-2">条件を減らして検索し直してください</p>
             </div>
           )}
+        </div>
+        <div className="mt-4 flex items-center justify-center gap-3">
+          <div className="flex items-center gap-2">
+            {(() => {
+              const take = 24
+              const totalPages = Math.max(1, Math.ceil(total / take))
+
+              function buildHref(p: number) {
+                const params = new URLSearchParams()
+                searchParams.forEach((value, key) => {
+                  if (key === 'page') return
+                  params.set(key, value)
+                })
+                params.set('page', String(p))
+                return `${pathname}?${params.toString()}`
+              }
+
+              return (
+                <>
+                  {pageNum > 1 ? (
+                    <Link href={buildHref(pageNum - 1)} className="bg-white border border-slate-200 text-slate-700 rounded-md w-6 h-6 flex items-center justify-center mr-1 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary-600" aria-label="前のページへ移動">
+                      <i className="fa-solid fa-chevron-left text-xs" aria-hidden />
+                      <span className="sr-only">前へ</span>
+                    </Link>
+                  ) : (
+                    <button className="bg-white border border-slate-200 text-slate-700 rounded-md w-6 h-6 flex items-center justify-center mr-1 opacity-50" disabled aria-label="前のページへ移動">
+                      <i className="fa-solid fa-chevron-left text-xs" aria-hidden />
+                      <span className="sr-only">前へ</span>
+                    </button>
+                  )}
+
+                  <span className="text-sm text-slate-600">{pageNum} / {totalPages}</span>
+
+                  {pageNum < totalPages ? (
+                    <Link href={buildHref(pageNum + 1)} className="bg-white border border-slate-200 text-slate-700 rounded-md w-6 h-6 flex items-center justify-center ml-1 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary-600" aria-label="次のページへ移動">
+                      <i className="fa-solid fa-chevron-right text-xs" aria-hidden />
+                      <span className="sr-only">次へ</span>
+                    </Link>
+                  ) : (
+                    <button className="bg-white border border-slate-200 text-slate-700 rounded-md w-6 h-6 flex items-center justify-center ml-1 opacity-50" disabled aria-label="次のページへ移動">
+                      <i className="fa-solid fa-chevron-right text-xs" aria-hidden />
+                      <span className="sr-only">次へ</span>
+                    </button>
+                  )}
+                </>
+              )
+            })()}
+          </div>
         </div>
       </section>
     </div>
