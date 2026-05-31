@@ -95,9 +95,7 @@ export default function AccountMenu({ currentUser, loadCurrentUser = false }: Ac
 
         if (!response.ok) {
           if (active) {
-            if (!cachedUser) {
-              setResolvedUser(null)
-            }
+            setResolvedUser(null)
             if (response.status === 401 || response.status === 404) {
               writeCachedAccountUser(null)
             }
