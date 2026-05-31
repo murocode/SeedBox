@@ -64,11 +64,12 @@ function parseTimeInput(value: string) {
 }
 
 export default async function UsersPage({ searchParams }: { searchParams?: SearchParams }) {
-  const query = typeof searchParams?.q === 'string' ? searchParams.q.trim() : ''
-  const pbMinRaw = typeof searchParams?.pbMin === 'string' ? searchParams.pbMin : ''
-  const pbMaxRaw = typeof searchParams?.pbMax === 'string' ? searchParams.pbMax : ''
-  const followingOnly = searchParams?.followingOnly === 'true'
-  const orderBy = searchParams?.orderBy === 'pbTime' ? 'pbTime' : 'username'
+  const sp = await searchParams
+  const query = typeof sp?.q === 'string' ? sp.q.trim() : ''
+  const pbMinRaw = typeof sp?.pbMin === 'string' ? sp.pbMin : ''
+  const pbMaxRaw = typeof sp?.pbMax === 'string' ? sp.pbMax : ''
+  const followingOnly = sp?.followingOnly === 'true'
+  const orderBy = sp?.orderBy === 'pbTime' ? 'pbTime' : 'username'
 
   const normalizedQuery = normalizeUsernameQuery(query)
   const parsedPbMin = parseTimeInput(pbMinRaw)
