@@ -28,13 +28,38 @@ export default async function UserPage({ params }: { params: Promise<{ username:
 
   const seeds = user
     ? await prisma.seed.findMany({
-      where: { authorUsername: user.username },
-      orderBy: { createdAt: 'desc' },
-      include: {
-        author: { select: { username: true, avatarUrl: true, speedrunId: true } },
-        _count: { select: { likes: true, favorites: true } }
-      }
-    })
+        where: { authorUsername: user.username },
+        orderBy: { createdAt: 'desc' },
+        select: {
+          id: true,
+          createdAt: true,
+          seedValue: true,
+          title: true,
+          comment: true,
+          owEase: true,
+          owTypes: true,
+          villageType: true,
+          hasBlacksmith: true,
+          netherEase: true,
+          fortressDistance: true,
+          fortressTypes: true,
+          fortressToNetherDist: true,
+          portalRoomEase: true,
+          zeroCycle: true,
+          _count: { select: { likes: true, favorites: true } }
+        }
+      })
+    : []
+
+  const seedsWithAuthor = user
+    ? seeds.map(seed => ({
+        ...seed,
+        author: {
+          username: user.username,
+          avatarUrl: user.avatarUrl,
+          speedrunId: user.speedrunId
+        }
+      }))
     : []
 
   // Determine whether the current user already liked/favorited each seed
@@ -179,7 +204,7 @@ export default async function UserPage({ params }: { params: Promise<{ username:
             <div>投稿一覧</div>
           </div>
           {/** Client-rendered seed list */}
-          <UserSeedsClient seeds={seeds} likedSet={Array.from(likedSet)} favoritedSet={Array.from(favoritedSet)} />
+          <UserSeedsClient seeds={seedsWithAuthor} likedSet={Array.from(likedSet)} favoritedSet={Array.from(favoritedSet)} />
         </section>
       </div>
     </SiteShell>
