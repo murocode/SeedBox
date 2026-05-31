@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useRouter } from 'next/navigation'
 import { supabase } from '../lib/supabaseClient'
+import { resolveCurrentUserClient } from '../lib/client-auth'
 
 type AccountUser = {
   username: string
@@ -31,32 +32,9 @@ export default function AccountMenu({ currentUser, loadCurrentUser = false }: Ac
 
     async function loadUser() {
       try {
-        const { data: sessionData } = await supabase.auth.getSession()
-        const accessToken = sessionData.session?.access_token
-
-        if (!accessToken) {
-          if (active) {
-            setResolvedUser(null)
-          }
-          return
-        }
-
-        const response = await fetch('/api/users/me', {
-          headers: {
-            Authorization: `Bearer ${accessToken}`
-          }
-        })
-
-        if (!response.ok) {
-          if (active) {
-            setResolvedUser(null)
-          }
-          return
-        }
-
-        const data = await response.json()
+        const user = await resolveCurrentUserClient()
         if (active) {
-          setResolvedUser(data.user ?? null)
+          setResolvedUser(user)
         }
       } catch {
         if (active) {
@@ -84,18 +62,8 @@ export default function AccountMenu({ currentUser, loadCurrentUser = false }: Ac
       if (event === 'SIGNED_IN' && session) {
         setLoading(true)
         try {
-          const accessToken = session.access_token
-          if (!accessToken) return
-
-          const response = await fetch('/api/users/me', {
-            headers: { Authorization: `Bearer ${accessToken}` }
-          })
-          if (!response.ok) {
-            setResolvedUser(null)
-            return
-          }
-          const data = await response.json().catch(() => ({}))
-          setResolvedUser(data.user ?? null)
+          const user = await resolveCurrentUserClient()
+          setResolvedUser(user)
         } catch (e) {
           setResolvedUser(null)
         } finally {

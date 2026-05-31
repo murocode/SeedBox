@@ -1,0 +1,21 @@
+name: Sync speedrun PBs
+
+on:
+  schedule:
+    - cron: "0 */6 * * *"
+  workflow_dispatch:
+
+jobs:
+  sync-pbs:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Call PB sync endpoint
+        env:
+          SITE_URL: ${{ secrets.SITE_URL }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          curl --fail-with-body \
+            -X GET \
+            -H "Authorization: Bearer $CRON_SECRET" \
+            "$SITE_URL/api/cron/sync-speedrun-pbs"

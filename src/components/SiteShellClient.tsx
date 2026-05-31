@@ -9,6 +9,7 @@ import MobileNav from './MobileNav'
 import PageHeader from './PageHeader'
 import PostButton from './PostButton'
 import { supabase } from '../lib/supabaseClient'
+import { resolveCurrentUserClient } from '../lib/client-auth'
 
 type NavItem = { href: string; label: string }
 
@@ -47,32 +48,9 @@ export default function SiteShellClient({
 
     async function loadCurrentUser() {
       try {
-        const { data: sessionData } = await supabase.auth.getSession()
-        const accessToken = sessionData.session?.access_token
-
-        if (!accessToken) {
-          if (active) {
-            setMobileUser(null)
-          }
-          return
-        }
-
-        const response = await fetch('/api/users/me', {
-          headers: {
-            Authorization: `Bearer ${accessToken}`
-          }
-        })
-
-        if (!response.ok) {
-          if (active) {
-            setMobileUser(null)
-          }
-          return
-        }
-
-        const data = await response.json().catch(() => ({}))
+        const user = await resolveCurrentUserClient()
         if (active) {
-          setMobileUser(data.user ?? null)
+          setMobileUser(user)
         }
       } catch {
         if (active) {
