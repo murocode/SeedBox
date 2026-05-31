@@ -44,53 +44,50 @@ export async function DELETE(request: NextRequest) {
       select: { id: true }
     }).then(rows => rows.map(row => row.id))
 
-    // Delete all related data in a single batch transaction.
-    // This avoids keeping an interactive transaction open while executing many statements.
-    await prisma.$transaction([
-      prisma.like.deleteMany({
-        where: { seedId: { in: seedIds } }
-      }),
-      prisma.favorite.deleteMany({
-        where: { seedId: { in: seedIds } }
-      }),
-      prisma.report.deleteMany({
-        where: { targetSeedId: { in: seedIds } }
-      }),
-      prisma.seed.deleteMany({
-        where: { authorUsername: username }
-      }),
-      prisma.like.deleteMany({
-        where: { userUsername: username }
-      }),
-      prisma.favorite.deleteMany({
-        where: { userUsername: username }
-      }),
-      prisma.follow.deleteMany({
-        where: {
-          OR: [
-            { followerUsername: username },
-            { followingUsername: username }
-          ]
-        }
-      }),
-      prisma.report.deleteMany({
-        where: {
-          OR: [
-            { reporterUsername: username },
-            { targetUsername: username }
-          ]
-        }
-      }),
-      prisma.oAuthAccount.deleteMany({
-        where: { userUsername: username }
-      }),
-      prisma.moderationLog.deleteMany({
-        where: { moderatorUsername: username }
-      }),
-      prisma.user.deleteMany({
-        where: { username }
-      })
-    ])
+    // Delete all related data sequentially so we do not depend on array transaction typing.
+    await prisma.like.deleteMany({
+      where: { seedId: { in: seedIds } }
+    })
+    await prisma.favorite.deleteMany({
+      where: { seedId: { in: seedIds } }
+    })
+    await prisma.report.deleteMany({
+      where: { targetSeedId: { in: seedIds } }
+    })
+    await prisma.seed.deleteMany({
+      where: { authorUsername: username }
+    })
+    await prisma.like.deleteMany({
+      where: { userUsername: username }
+    })
+    await prisma.favorite.deleteMany({
+      where: { userUsername: username }
+    })
+    await prisma.follow.deleteMany({
+      where: {
+        OR: [
+          { followerUsername: username },
+          { followingUsername: username }
+        ]
+      }
+    })
+    await prisma.report.deleteMany({
+      where: {
+        OR: [
+          { reporterUsername: username },
+          { targetUsername: username }
+        ]
+      }
+    })
+    await prisma.oAuthAccount.deleteMany({
+      where: { userUsername: username }
+    })
+    await prisma.moderationLog.deleteMany({
+      where: { moderatorUsername: username }
+    })
+    await prisma.user.deleteMany({
+      where: { username }
+    })
 
     // Delete user from Supabase Auth
     try {
