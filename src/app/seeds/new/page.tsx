@@ -294,7 +294,7 @@ export default function SeedNewPage() {
               <textarea
                 value={form.comment}
                 onChange={e => handleInputChange('comment', e.target.value)}
-                placeholder="シードについての詳細な説明（Markdown対応・1000文字以内）"
+                placeholder="シードについての詳細な説明（1000文字以内）"
                 maxLength={1000}
                 className="w-full rounded-lg border px-3 py-2 min-h-28 focus:outline-none focus:ring-2 focus:ring-primary-600"
               />
