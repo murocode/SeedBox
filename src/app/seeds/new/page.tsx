@@ -180,7 +180,6 @@ export default function SeedNewPage() {
     const errors: string[] = []
     if (!form.seed.trim() || seedError) errors.push('Seed値')
     if (!form.title.trim()) errors.push('タイトル')
-
     if (errors.length > 0) {
       setSubmitError(`必須項目を入力してください: ${errors.join(', ')}`)
       return
@@ -239,8 +238,13 @@ export default function SeedNewPage() {
       }
 
       setSubmitSuccess('投稿しました')
-      if (responseData.seed?.author?.username && responseData.seed?.seedValue) {
-        router.push(`/seeds/${responseData.seed.author.username}/${responseData.seed.seedValue}`)
+      // Redirect to detail page. If API didn't return seed info, fall back to optimistic redirect using syncData or form.seed
+      const authorUsername = responseData.seed?.author?.username || syncData?.user?.username
+      const seedValue = responseData.seed?.seedValue || form.seed
+      if (authorUsername && seedValue) {
+        router.push(`/seeds/${authorUsername}/${seedValue}`)
+      } else {
+        // missing redirect info; no action
       }
     } catch (error: any) {
       setSubmitError(error?.message || '投稿に失敗しました')

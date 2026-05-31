@@ -123,7 +123,7 @@ export default function SeedEditPage() {
 
   const showVillageFields = form.owTypes.includes('村')
 
-  const canSubmit = Boolean(form.title.trim())
+  const canSubmit = Boolean(form.title.trim() && form.fortressDistance.trim())
 
   const ToggleButton = ({ label, isActive, onClick }: { label: string; isActive: boolean; onClick: () => void }) => (
     <button
