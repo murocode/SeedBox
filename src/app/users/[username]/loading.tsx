@@ -25,12 +25,18 @@ export default function Loading() {
 
         <section className="lg:col-span-8 space-y-4">
           <div className="h-5 w-24 rounded-full bg-slate-200 animate-pulse" />
-          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          <div className="space-y-4">
             {Array.from({ length: 6 }).map((_, index) => (
               <div key={index} className="rounded-2xl border bg-white p-4 shadow-sm space-y-3 animate-pulse">
-                <div className="h-40 rounded-xl bg-slate-200" />
-                <div className="h-4 w-3/4 rounded-full bg-slate-200" />
-                <div className="h-4 w-1/2 rounded-full bg-slate-200" />
+                <div className="h-6 w-36 rounded-full bg-slate-200" />
+                <div className="flex items-start gap-4">
+                  <div className="h-12 w-12 rounded-full bg-slate-200" />
+                  <div className="flex-1 space-y-2">
+                    <div className="h-4 w-3/4 rounded-full bg-slate-200" />
+                    <div className="h-4 w-1/2 rounded-full bg-slate-200" />
+                  </div>
+                </div>
+                <div className="h-4 w-full rounded-full bg-slate-200" />
               </div>
             ))}
           </div>
