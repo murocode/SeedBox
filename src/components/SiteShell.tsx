@@ -27,7 +27,8 @@ export default async function SiteShell({
   rightSlot,
   heroActions,
   icon,
-  layout = 'page'
+  layout = 'page',
+  hideHeader = false
 }: {
   title: string
   subtitle?: string
@@ -36,6 +37,7 @@ export default async function SiteShell({
   heroActions?: React.ReactNode
   icon?: string
   layout?: 'page' | 'hero'
+  hideHeader?: boolean
 }) {
   const cookieStore = await cookies()
   const currentUser = parseAccountCookieUser(cookieStore.get(ACCOUNT_USER_COOKIE_NAME)?.value) ?? undefined
@@ -77,21 +79,23 @@ export default async function SiteShell({
       </header>
 
       <main className="container mx-auto flex-1 overflow-x-clip px-4 py-8">
-        {layout === 'hero' ? (
-          <section className="mb-8 rounded-2xl border bg-gradient-to-br from-white via-white to-primary-50 p-6 shadow-lg md:p-8">
-            <div className="md:flex md:items-center md:justify-between md:gap-6">
-              <div className="max-w-3xl">
-                <p className="text-sm font-medium uppercase tracking-[0.2em] text-primary-500">SeedBox</p>
-                <h1 className="mt-2 text-3xl font-bold text-slate-900 md:text-4xl">{title}</h1>
-                {subtitle ? <p className="mt-3 leading-7 text-slate-600">{subtitle}</p> : null}
-                {heroActions ? <div className="mt-4">{heroActions}</div> : null}
+        {!hideHeader ? (
+          layout === 'hero' ? (
+            <section className="mb-8 rounded-2xl border bg-gradient-to-br from-white via-white to-primary-50 p-6 shadow-lg md:p-8">
+              <div className="md:flex md:items-center md:justify-between md:gap-6">
+                <div className="max-w-3xl">
+                  <p className="text-sm font-medium uppercase tracking-[0.2em] text-primary-500">SeedBox</p>
+                  <h1 className="mt-2 text-3xl font-bold text-slate-900 md:text-4xl">{title}</h1>
+                  {subtitle ? <p className="mt-3 leading-7 text-slate-600">{subtitle}</p> : null}
+                  {heroActions ? <div className="mt-4">{heroActions}</div> : null}
+                </div>
+                {rightSlot ? <div className="mt-6 md:mt-0 md:flex-none md:w-96 lg:w-[400px]">{rightSlot}</div> : null}
               </div>
-              {rightSlot ? <div className="mt-6 md:mt-0 md:flex-none md:w-96 lg:w-[400px]">{rightSlot}</div> : null}
-            </div>
-          </section>
-        ) : (
-          <PageHeader title={title} subtitle={subtitle} icon={icon} rightSlot={rightSlot} />
-        )}
+            </section>
+          ) : (
+            <PageHeader title={title} subtitle={subtitle} icon={icon} rightSlot={rightSlot} />
+          )
+        ) : null}
         {children}
       </main>
 
