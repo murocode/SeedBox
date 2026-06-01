@@ -2,14 +2,15 @@ import SiteShell from '../components/SiteShell'
 
 export default function Loading() {
   return (
-    <SiteShell layout="hero" title="自分に合わせた練習を。" subtitle="SeedBoxは自分の苦手な地形を練習するのに役立つサービスです。">
+    <SiteShell layout="page" hideHeader title="" subtitle="">
       <>
-        <section className="mb-8 rounded-2xl border bg-gradient-to-br from-white via-white to-primary-50 p-6 shadow-lg md:p-8">
+        <section className="mb-8 rounded-2xl border bg-gradient-to-br from-white via-white to-primary-50 p-6 shadow-lg md:p-8" aria-busy="true">
           <div className="md:flex md:items-center md:justify-between md:gap-6">
             <div className="max-w-3xl space-y-4">
+              <div className="h-4 w-20 rounded-full bg-slate-200 animate-pulse" />
               <div className="h-4 w-28 rounded-full bg-slate-200 animate-pulse" />
-              <div className="h-10 w-[min(22rem,100%)] rounded-xl bg-slate-200 animate-pulse" />
-              <div className="h-5 w-[min(36rem,100%)] rounded-xl bg-slate-200 animate-pulse" />
+              <div className="h-12 w-[min(28rem,100%)] rounded-xl bg-slate-200 animate-pulse" />
+              <div className="h-5 w-[min(40rem,100%)] rounded-xl bg-slate-200 animate-pulse" />
               <div className="h-10 w-36 rounded-full bg-slate-200 animate-pulse" />
             </div>
             <div className="mt-6 md:mt-0 md:w-96 lg:w-[400px] space-y-3">

@@ -93,7 +93,7 @@ export default async function FavoritesPage({ searchParams }: Props) {
           <div className="rounded-2xl bg-white border shadow-sm p-6 text-sm text-slate-700">お気に入りに登録されたシードがありません。</div>
         ) : (
           <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4">
               {orderedSeeds.map(seed => (
                 <SeedCard
                   key={seed.id}
