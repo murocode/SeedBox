@@ -26,5 +26,8 @@ body{
 .btn-primary{ @apply bg-primary-500 text-white hover:bg-primary-600 }
 .btn-secondary{ @apply bg-slate-100 text-slate-800 hover:bg-slate-200 }
 
+/* outline button used by FollowButton */
+.btn-outline{ @apply inline-flex items-center justify-center rounded-md px-4 py-2 font-medium border border-slate-200 bg-white text-slate-800 hover:bg-slate-50 }
+
 .site-header{ @apply bg-white border-b shadow-sm }
 
