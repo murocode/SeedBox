@@ -61,6 +61,19 @@ export default function SeedCard({
     if (e.key === 'Enter' || e.key === ' ') router.push(resolvedHref)
   }
 
+  const tagClass = (category: 'ow' | 'nether' | 'end') => {
+    switch (category) {
+      case 'ow':
+        return 'rounded-full bg-lime-600 px-2 py-1 text-lime-100'
+      case 'nether':
+        return 'rounded-full bg-rose-950 px-2 py-1 text-rose-100'
+      case 'end':
+        return 'rounded-full bg-slate-600 px-2 py-1 text-white'
+      default:
+        return 'rounded-full bg-slate-100 px-2 py-1'
+    }
+  }
+
   return (
     <article
       className={`min-w-0 max-w-full overflow-hidden rounded-xl border bg-white shadow-lg ${resolvedHref ? 'cursor-pointer' : ''}`}
@@ -101,12 +114,12 @@ export default function SeedCard({
             <p className="mt-2 break-words text-sm text-slate-700 line-clamp-3">{seed.comment || '説明なし'}</p>
 
             <div className="mt-4 flex max-w-full flex-wrap gap-2 text-xs font-medium text-slate-600">
-              {seed.owEase ? <span className="rounded-full bg-slate-100 px-2 py-1">OW: {EASE_LABELS[seed.owEase]}</span> : null}
-              {seed.netherEase ? <span className="rounded-full bg-slate-100 px-2 py-1">ネザー: {EASE_LABELS[seed.netherEase]}</span> : null}
-              {seed.fortressDistance ? <span className="rounded-full bg-slate-100 px-2 py-1">廃要塞距離: {DISTANCE_LABELS[seed.fortressDistance]}</span> : null}
-              {seed.fortressToNetherDist ? <span className="rounded-full bg-slate-100 px-2 py-1">砦距離: {DISTANCE_LABELS[seed.fortressToNetherDist]}</span> : null}
-              {seed.portalRoomEase ? <span className="rounded-full bg-slate-100 px-2 py-1">ポータル: {PORTAL_EASE_LABELS[seed.portalRoomEase]}</span> : null}
-              {seed.zeroCycle ? <span className="rounded-full bg-slate-100 px-2 py-1">ゼロサイクル: {ZERO_CYCLE_LABELS[seed.zeroCycle]}</span> : null}
+              {seed.owEase ? <span className={tagClass('ow')}>OW: {EASE_LABELS[seed.owEase]}</span> : null}
+              {seed.netherEase ? <span className={tagClass('nether')}>ネザー: {EASE_LABELS[seed.netherEase]}</span> : null}
+              {seed.fortressDistance ? <span className={tagClass('nether')}>廃要塞距離: {DISTANCE_LABELS[seed.fortressDistance]}</span> : null}
+              {seed.fortressToNetherDist ? <span className={tagClass('nether')}>砦距離: {DISTANCE_LABELS[seed.fortressToNetherDist]}</span> : null}
+              {seed.portalRoomEase ? <span className={tagClass('end')}>ポータル: {PORTAL_EASE_LABELS[seed.portalRoomEase]}</span> : null}
+              {seed.zeroCycle ? <span className={tagClass('end')}>ゼロサイクル: {ZERO_CYCLE_LABELS[seed.zeroCycle]}</span> : null}
             </div>
           </div>
         </div>
