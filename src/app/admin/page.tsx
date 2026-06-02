@@ -3,6 +3,7 @@ import { ModerationActions } from '../../components/ModerationActions'
 import { prisma } from '../../lib/prisma'
 import { cookies } from 'next/headers'
 import { resolveCurrentUser, hasModerationAccess } from '../../lib/auth'
+import { ACCOUNT_USER_COOKIE_NAME, parseAccountCookieUser } from '../../lib/account-cookie'
 import Link from 'next/link'
 import SyncPBButton from '../../components/SyncPBButton'
 
@@ -61,8 +62,10 @@ export default async function AdminPage() {
   const cookieStore = await cookies()
   const accessToken = cookieStore.get('sb-access-token')?.value
   const currentUser = await resolveCurrentUser(accessToken)
+  const accountUser = parseAccountCookieUser(cookieStore.get(ACCOUNT_USER_COOKIE_NAME)?.value)
+  const canModerate = hasModerationAccess(currentUser) || hasModerationAccess(accountUser)
 
-  if (!hasModerationAccess(currentUser)) {
+  if (!canModerate) {
     return (
       <SiteShell title="管理画面" subtitle="権限がありません。" icon="fa-shield-halved">
         <div className="rounded-2xl border bg-white p-6 shadow-sm text-slate-600">

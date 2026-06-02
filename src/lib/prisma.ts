@@ -22,6 +22,10 @@ function getPrismaDatabaseUrl() {
   }
 
   if (isSupabasePooler) {
+    if (url.port !== '6543') {
+      url.port = '6543'
+    }
+
     if (!url.searchParams.has('pgbouncer')) {
       url.searchParams.set('pgbouncer', 'true')
     }
