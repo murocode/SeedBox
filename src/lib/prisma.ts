@@ -3,6 +3,8 @@ import { Prisma, PrismaClient } from '@prisma/client'
 declare global {
   // eslint-disable-next-line no-var
   var prisma: PrismaClient | undefined
+  // eslint-disable-next-line no-var
+  var prismaBootstrap: Promise<void> | null | undefined
 }
 
 function getPrismaDatabaseUrl() {
@@ -59,7 +61,6 @@ const basePrisma = globalThis.prisma ?? new PrismaClient(
 )
 if (process.env.NODE_ENV !== 'production') globalThis.prisma = basePrisma
 
-let bootstrapPromise: Promise<void> | null = null
 
 const schemaBootstrapStatements = [
   `DO $$ BEGIN CREATE TYPE "Ease" AS ENUM ('EASY', 'NORMAL', 'HARD'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;`,
@@ -247,14 +248,14 @@ async function bootstrapDatabase() {
 }
 
 async function ensureDatabaseReady() {
-  if (!bootstrapPromise) {
-    bootstrapPromise = bootstrapDatabase().catch(error => {
-      bootstrapPromise = null
+  if (!globalThis.prismaBootstrap) {
+    globalThis.prismaBootstrap = bootstrapDatabase().catch(error => {
+      globalThis.prismaBootstrap = null
       throw error
     })
   }
 
-  return bootstrapPromise
+  return globalThis.prismaBootstrap
 }
 
 function wrapCallable<T extends (...args: any[]) => any>(target: T) {
