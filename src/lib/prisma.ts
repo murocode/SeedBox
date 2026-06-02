@@ -25,7 +25,7 @@ function getPrismaDatabaseUrl() {
     hostname.includes('pooler.supabase.com') || url.port === '6543' || url.searchParams.get('pgbouncer') === 'true'
 
   if (!isLocalDatabase && !url.searchParams.has('connection_limit')) {
-    url.searchParams.set('connection_limit', '1')
+    url.searchParams.set('connection_limit', '5')
   }
 
   if (isSupabasePooler) {
