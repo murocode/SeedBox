@@ -68,11 +68,11 @@ export async function resolveCurrentUser(accessToken?: string | null) {
     return null
   }
 
-  const email = normalizeEmail(data.user.email)
-  if (email) {
-    const user = await findUserByEmail(email)
+  const authEmail = normalizeEmail(data.user.email)
+  if (authEmail) {
+    const user = await findUserByEmail(authEmail)
     if (user) {
-      return { ...user, role: resolveRole(user.email) }
+      return { ...user, email: authEmail, role: resolveRole(authEmail) }
     }
   }
 
@@ -84,14 +84,15 @@ export async function resolveCurrentUser(accessToken?: string | null) {
     }).catch(() => null)
 
     if (oauthAccount?.user) {
-      return { ...oauthAccount.user, role: resolveRole(oauthAccount.user.email) }
+      const resolvedEmail = authEmail || oauthAccount.user.email
+      return { ...oauthAccount.user, email: resolvedEmail, role: resolveRole(resolvedEmail) }
     }
   }
 
   return null
 }
 
-export function hasModerationAccess(user: { email?: string | null } | null | undefined) {
-  const role = resolveRole(user?.email)
+export function hasModerationAccess(user: { email?: string | null; role?: UserRole | null } | null | undefined) {
+  const role = user?.role ?? resolveRole(user?.email)
   return role === 'MODERATOR' || role === 'ADMIN'
 }
