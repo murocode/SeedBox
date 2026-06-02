@@ -40,7 +40,7 @@ export default function CopySeedButton({ seedValue, showLabel = true, variant = 
       onClick={handleCopy}
       aria-label="Copy seed"
       className={variant === 'chip'
-        ? 'inline-flex items-center gap-2 rounded-full bg-slate-900 px-3 py-1 text-white transition hover:bg-slate-800'
+        ? 'inline-flex items-center gap-2 rounded-full border border-slate-900 bg-white px-3 py-1 text-slate-900 transition hover:bg-slate-100'
         : 'inline-flex items-center justify-center rounded-full text-white/90 transition hover:text-white'}
     >
       {variant === 'chip' ? <span>Seed</span> : null}

@@ -115,6 +115,19 @@ export default function SeedNewPage() {
     </button>
   )
 
+  const badgeClass = (category: 'ow' | 'nether' | 'end') => {
+    switch (category) {
+      case 'ow':
+        return 'bg-lime-600 text-lime-100'
+      case 'nether':
+        return 'bg-rose-950 text-rose-100'
+      case 'end':
+        return 'bg-slate-600 text-white'
+      default:
+        return 'bg-primary-50 text-primary-700'
+    }
+  }
+
   const SectionHeader = ({ title, expanded, badgeCount, onToggle }: { title: string; expanded: boolean; badgeCount: number; onToggle: () => void }) => (
     <button
       onClick={onToggle}
@@ -474,21 +487,21 @@ export default function SeedNewPage() {
               <div className="font-semibold text-slate-900 mb-3">選択中のタグ</div>
               <div className="flex flex-wrap gap-2">
                 {[
-                  form.owEase && `OW: ${form.owEase}`,
-                  form.owTypes.length > 0 && `OWタイプ: ${form.owTypes.join(', ')}`,
-                  form.villageType && `村: ${form.villageType}`,
-                  form.hasBlacksmith && `鍛冶屋: ${form.hasBlacksmith}`,
-                  form.netherEase && `ネザー: ${form.netherEase}`,
-                  form.fortressDistance && `廃要塞距離: ${form.fortressDistance}`,
-                  form.fortressTypes.length > 0 && `廃要塞タイプ: ${form.fortressTypes.join(', ')}`,
-                  form.fortressNetherDistance && `廃要塞-要塞距離: ${form.fortressNetherDistance}`,
-                  form.portalRoomEase && `ポータル: ${form.portalRoomEase}`,
-                  form.zeroCycle && `ゼロサイクル: ${form.zeroCycle}`
+                  form.owEase && { text: `OW: ${form.owEase}`, category: 'ow' },
+                  form.owTypes.length > 0 && { text: `OWタイプ: ${form.owTypes.join(', ')}`, category: 'ow' },
+                  form.villageType && { text: `村: ${form.villageType}`, category: 'ow' },
+                  form.hasBlacksmith && { text: `鍛冶屋: ${form.hasBlacksmith}`, category: 'ow' },
+                  form.netherEase && { text: `ネザー: ${form.netherEase}`, category: 'nether' },
+                  form.fortressDistance && { text: `廃要塞距離: ${form.fortressDistance}`, category: 'nether' },
+                  form.fortressTypes.length > 0 && { text: `廃要塞タイプ: ${form.fortressTypes.join(', ')}`, category: 'nether' },
+                  form.fortressNetherDistance && { text: `廃要塞-要塞距離: ${form.fortressNetherDistance}`, category: 'nether' },
+                  form.portalRoomEase && { text: `ポータル: ${form.portalRoomEase}`, category: 'end' },
+                  form.zeroCycle && { text: `ゼロサイクル: ${form.zeroCycle}`, category: 'end' }
                 ]
                   .filter(Boolean)
-                  .map((tag, idx) => (
-                    <div key={idx} className="bg-primary-50 text-primary-700 px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap">
-                      {tag}
+                  .map((tag: any, idx) => (
+                    <div key={idx} className={`${badgeClass(tag.category)} px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap`}>
+                      {tag.text}
                     </div>
                   ))}
               </div>
