@@ -57,10 +57,10 @@ export default function PostButton({ className, onNavigate }: PostButtonProps) {
       type="button"
       onClick={handleClick}
       disabled={checking}
-      className={className}
+      className={className || 'btn btn-primary'}
       aria-busy={checking}
     >
-      <i className="fa-solid fa-plus mr-2" aria-hidden />
+      {checking ? <i className="fa-solid fa-spinner fa-spin mr-2" aria-hidden /> : <i className="fa-solid fa-plus mr-2" aria-hidden />}
       投稿
     </button>
   )

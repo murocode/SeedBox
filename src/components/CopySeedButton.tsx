@@ -40,13 +40,13 @@ export default function CopySeedButton({ seedValue, showLabel = true, variant = 
       onClick={handleCopy}
       aria-label="Copy seed"
       className={variant === 'chip'
-        ? 'inline-flex items-center gap-2 rounded-full border border-slate-900 bg-white px-3 py-1 text-slate-900 transition hover:bg-slate-100'
-        : 'inline-flex items-center justify-center rounded-full text-white/90 transition hover:text-white'}
+        ? 'inline-flex items-center gap-2 rounded-full border border-accent-600 bg-white px-3 py-1 text-accent-700 transition hover:bg-slate-50'
+        : 'inline-flex items-center justify-center rounded-full bg-accent-600 text-white transition hover:bg-accent-700'}
     >
       {variant === 'chip' ? <span>Seed</span> : null}
       {variant === 'chip' ? <span className="font-mono break-all">{seedValue}</span> : null}
       <i className={copied ? 'fa-solid fa-check' : 'fa-regular fa-clone'} aria-hidden />
-      {showLabel ? <span>{copied ? 'コピー済み' : 'コピー'}</span> : null}
+      {showLabel ? <span className="ml-2">{copied ? 'コピー済み' : 'コピー'}</span> : null}
     </button>
   )
 }
