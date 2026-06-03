@@ -3,6 +3,7 @@ import { cookies } from 'next/headers'
 import { prisma } from '../../../lib/prisma'
 import { cacheGet, cacheSet } from '../../../lib/cache'
 import { resolveCurrentUser } from '../../../lib/auth'
+import { ACCOUNT_USER_COOKIE_NAME, parseAccountCookieUser } from '../../../lib/account-cookie'
 import {
   buildUniqueUsername,
   normalizeDistance,
@@ -77,25 +78,40 @@ export async function GET(request: NextRequest) {
     }
 
     // author filter by username
+    const authorWhere: any = {}
+
     if (q.get('author')) {
-      where.author = { username: q.get('author')?.toLowerCase() }
+      authorWhere.username = q.get('author')?.toLowerCase()
     }
 
     // フォロー中フィルター
     if (q.get('followingOnly') === 'true') {
-      const cookieStore = await cookies()
-      const accessToken = cookieStore.get('sb-access-token')?.value
-      
+      let currentUser = null
+
       if (accessToken) {
-        const currentUser = await resolveCurrentUser(accessToken)
-        if (currentUser) {
-          where.author = {
-            followers: {
-              some: { followerUsername: currentUser.username }
-            }
-          }
+        currentUser = await resolveCurrentUser(accessToken)
+      }
+
+      if (!currentUser) {
+        const accountUser = parseAccountCookieUser(cookieStore.get(ACCOUNT_USER_COOKIE_NAME)?.value)
+        if (accountUser) {
+          currentUser = await prisma.user.findUnique({
+            where: { username: accountUser.username }
+          })
         }
       }
+
+      if (currentUser) {
+        authorWhere.followers = {
+          some: { followerUsername: currentUser.username }
+        }
+      } else {
+        authorWhere.username = '__seedbox_no_authenticated_user__'
+      }
+    }
+
+    if (Object.keys(authorWhere).length > 0) {
+      where.author = authorWhere
     }
 
     const take = Math.min(100, Number(q.get('limit') || 20))
