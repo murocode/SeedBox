@@ -14,6 +14,7 @@ export default function UsersSearchQuickControls({ followingOnly, orderBy }: Pro
 
   function apply(nextFollowingOnly: boolean, nextOrderBy: 'username' | 'pbTime') {
     const params = new URLSearchParams(searchParams.toString())
+    params.delete('page')
 
     if (nextFollowingOnly) {
       params.set('followingOnly', 'true')

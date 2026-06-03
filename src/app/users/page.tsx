@@ -8,6 +8,7 @@ import { formatTime } from '../../lib/speedrun'
 import { prisma } from '../../lib/prisma'
 import { resolveCurrentUser } from '../../lib/auth'
 import UsersSearchQuickControls from '../../components/UsersSearchQuickControls'
+import { ACCOUNT_USER_COOKIE_NAME, parseAccountCookieUser } from '../../lib/account-cookie'
 
 export const dynamic = 'force-dynamic'
 
@@ -108,11 +109,23 @@ export default async function UsersPage({ searchParams }: { searchParams?: Searc
 
     if (accessToken) {
       currentUser = await resolveCurrentUser(accessToken)
-      if (currentUser) {
-        where.followers = {
-          some: { followerUsername: currentUser.username }
-        }
+    }
+
+    if (!currentUser) {
+      const accountUser = parseAccountCookieUser(cookieStore.get(ACCOUNT_USER_COOKIE_NAME)?.value)
+      if (accountUser) {
+        currentUser = await prisma.user.findUnique({
+          where: { username: accountUser.username }
+        })
       }
+    }
+
+    if (currentUser) {
+      where.followers = {
+        some: { followerUsername: currentUser.username }
+      }
+    } else {
+      where.username = { equals: '__seedbox_no_authenticated_user__' }
     }
   }
 
