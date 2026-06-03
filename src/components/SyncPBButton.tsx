@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from 'react'
+import { supabase } from '../lib/supabaseClient'
 
 export default function SyncPBButton() {
   const [loading, setLoading] = useState(false)
@@ -13,9 +14,12 @@ export default function SyncPBButton() {
     setResult(null)
 
     try {
+      const { data: sessionData } = await supabase.auth.getSession()
+      const accessToken = sessionData.session?.access_token
       const res = await fetch('/api/admin/sync-pbs', {
         method: 'POST',
-        credentials: 'include'
+        credentials: 'include',
+        headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined
       })
       const data = await res.json().catch(() => null)
       if (!res.ok) {
