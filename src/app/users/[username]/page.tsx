@@ -9,8 +9,34 @@ import { prisma } from '../../../lib/prisma'
 import { hasModerationAccess, resolveCurrentUser } from '../../../lib/auth'
 import { formatTime } from '../../../lib/speedrun'
 import { validateUrl } from '../../../lib/validation'
+import type { Metadata } from 'next'
+
+export async function generateMetadata(
+  { params }: { params: Promise<{ username: string }> }
+): Promise<Metadata> {
+  const { username } = await params
+  const user = await prisma.user.findUnique({
+    where: { username: username.toLowerCase() },
+    select: { bio: true, _count: { select: { seeds: true } } },
+  })
+
+  const title = `@${username} のプロフィール`
+  const description = user?.bio
+    ? `@${username} のSeedBoxプロフィール。${user.bio.slice(0, 80)}`
+    : `@${username} のSeedBoxプロフィール。投稿シード数: ${user?._count.seeds ?? 0}件。`
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title: `${title} | SeedBox`,
+      description,
+    },
+  }
+}
 
 export const dynamic = 'force-dynamic'
+
 
 export default async function UserPage({ params }: { params: Promise<{ username: string }> }) {
   const cookieStore = await cookies()

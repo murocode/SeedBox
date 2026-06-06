@@ -2,8 +2,21 @@ import { prisma } from '../lib/prisma'
 import SiteShell from '../components/SiteShell'
 import SeedGrid from '../components/SeedGrid'
 import PlayerRow from '../components/PlayerRow'
+import type { Metadata } from 'next'
 
-// 公開データは ISR を使ってキャッシュして FCP を改善する
+export const metadata: Metadata = {
+  title: {
+    absolute: 'SeedBox',
+  },
+  description: 'Minecraft Java Edition 1.16.1 スピードランの練習に役立つシードデータベース。苦手な地形を繰り返し練習できるシードを探そう。',
+  openGraph: {
+    title: 'SeedBox',
+    description: 'Minecraft Java Edition 1.16.1 スピードランの練習に役立つシードデータベース。苦手な地形を繰り返し練習できるシードを探そう。',
+  },
+}
+
+
+
 export const revalidate = 60
 
 export default async function Home() {

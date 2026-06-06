@@ -10,8 +10,34 @@ import { resolveCurrentUser } from '../../../../lib/auth'
 import { formatTime } from '../../../../lib/speedrun'
 import { cookies } from 'next/headers'
 import Link from 'next/link'
+import type { Metadata } from 'next'
+
+export async function generateMetadata(
+  { params }: { params: Promise<{ username: string; seedValue: string }> }
+): Promise<Metadata> {
+  const { username, seedValue } = await params
+  const seed = await prisma.seed.findFirst({
+    where: { seedValue, author: { username: username.toLowerCase() } },
+    select: { title: true, comment: true },
+  })
+
+  const title = seed?.title ? `${seed.title} (${seedValue})` : `シード: ${seedValue}`
+  const description = seed?.comment
+    ? `@${username} が投稿したシード ${seedValue}。${seed.comment.slice(0, 80)}`
+    : `@${username} が投稿したMinecraft 1.16.1スピードランシード ${seedValue}。`
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title: `${title} | SeedBox`,
+      description,
+    },
+  }
+}
 
 export const dynamic = 'force-dynamic'
+
 
 export default async function SeedDetailPage({ params }: { params: Promise<{ username: string; seedValue: string }> }) {
   // 現在のユーザーを取得

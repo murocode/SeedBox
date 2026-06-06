@@ -2,6 +2,18 @@ import React from 'react'
 import SiteShell from '../../components/SiteShell'
 import SeedSearchBoard from '../../components/SeedSearchBoard'
 import SeedGridSkeleton from '../../components/SeedGridSkeleton'
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'シード検索',
+  description: '地形・構造物・ネザーなどの条件でMinecraft 1.16.1スピードラン用シードを絞り込み検索できます。',
+  openGraph: {
+    title: 'シード検索 | SeedBox',
+    description: '地形・構造物・ネザーなどの条件でMinecraft 1.16.1スピードラン用シードを絞り込み検索できます。',
+  },
+}
+
+
 
 export default function SeedsPage() {
   return (
