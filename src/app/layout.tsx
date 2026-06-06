@@ -1,10 +1,39 @@
-﻿import '../styles/globals.css'
+import '../styles/globals.css'
 import React from 'react'
 import { SpeedInsights } from '@vercel/speed-insights/next'
 
-export const metadata = {
-  title: 'SeedBox for Minecraft Speedrunning',
-  description: 'Minecraft Java Edition 1.16.1 Speedrunning シードデータベース'
+export const metadata: import('next').Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://seedbox.example.com'),
+  title: {
+    default: 'SeedBox',
+    template: '%s | SeedBox',
+  },
+  description: 'Minecraft Java Edition 1.16.1 スピードラン向けシードデータベース。地形・構造物・ネザーの条件で絞り込み、自分の練習に合ったシードを探せます。',
+  openGraph: {
+    type: 'website',
+    locale: 'ja_JP',
+    siteName: 'SeedBox',
+    title: 'SeedBox',
+    description: 'Minecraft Java Edition 1.16.1 スピードラン向けシードデータベース。地形・構造物・ネザーの条件で絞り込み、自分の練習に合ったシードを探せます。',
+    images: [
+      {
+        url: '/seedbox-logo.png',
+        width: 1200,
+        height: 630,
+        alt: 'SeedBox ロゴ',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'SeedBox',
+    description: 'Minecraft Java Edition 1.16.1 スピードラン向けシードデータベース。',
+    images: ['/seedbox-logo.png'],
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 }
 
  
@@ -46,6 +75,28 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </noscript>
         {/* Favicon */}
         <link rel="icon" href="/seedbox-logo.png" />
+        {/* JSON-LD 構造化データ */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'WebSite',
+              name: 'SeedBox',
+              url: process.env.NEXT_PUBLIC_SITE_URL || 'https://seedbox.example.com',
+              description: 'Minecraft Java Edition 1.16.1 スピードラン向けシードデータベース。地形・構造物・ネザーの条件で絞り込み、自分の練習に合ったシードを探せます。',
+              inLanguage: 'ja',
+              potentialAction: {
+                '@type': 'SearchAction',
+                target: {
+                  '@type': 'EntryPoint',
+                  urlTemplate: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://seedbox.example.com'}/seeds?q={search_term_string}`,
+                },
+                'query-input': 'required name=search_term_string',
+              },
+            }),
+          }}
+        />
       </head>
       <body className="min-h-screen bg-slate-50 text-slate-900 antialiased flex flex-col">
         {children}

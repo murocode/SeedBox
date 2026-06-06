@@ -1,4 +1,4 @@
-﻿import SiteShell from '../../components/SiteShell'
+import SiteShell from '../../components/SiteShell'
 import { ModerationActions } from '../../components/ModerationActions'
 import { prisma } from '../../lib/prisma'
 import { cookies } from 'next/headers'
@@ -6,8 +6,15 @@ import { resolveCurrentUser, hasModerationAccess } from '../../lib/auth'
 import { ACCOUNT_USER_COOKIE_NAME, parseAccountCookieUser } from '../../lib/account-cookie'
 import Link from 'next/link'
 import SyncPBButton from '../../components/SyncPBButton'
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: '管理画面',
+  robots: { index: false, follow: false },
+}
 
 export const dynamic = 'force-dynamic'
+
 
 function getReportKindLabel(report: { targetSeedId?: number | null; targetUser?: { username: string } | null; note?: string | null }) {
   if (report.targetSeedId) return '投稿通報'

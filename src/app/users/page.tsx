@@ -9,8 +9,19 @@ import { prisma } from '../../lib/prisma'
 import { resolveCurrentUser } from '../../lib/auth'
 import UsersSearchQuickControls from '../../components/UsersSearchQuickControls'
 import { ACCOUNT_USER_COOKIE_NAME, parseAccountCookieUser } from '../../lib/account-cookie'
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'ユーザー検索',
+  description: 'SeedBox に登録しているMinecraftスピードランナーを検索できます。PBタイムやフォロー状況で絞り込みが可能です。',
+  openGraph: {
+    title: 'ユーザー検索 | SeedBox',
+    description: 'SeedBox に登録しているMinecraftスピードランナーを検索できます。PBタイムやフォロー状況で絞り込みが可能です。',
+  },
+}
 
 export const dynamic = 'force-dynamic'
+
 
 type SearchParams = {
   q?: string

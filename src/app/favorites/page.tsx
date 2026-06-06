@@ -4,8 +4,15 @@ import { prisma } from '../../lib/prisma'
 import { resolveCurrentUser } from '../../lib/auth'
 import SeedCard from '../../components/SeedCard'
 import Link from 'next/link'
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'お気に入り',
+  robots: { index: false, follow: false },
+}
 
 export const dynamic = 'force-dynamic'
+
 
 type Props = { searchParams?: { page?: string } | Promise<{ page?: string }> }
 
