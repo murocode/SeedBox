@@ -23,7 +23,7 @@ export default function UsersListClient({ users }: { users: User[] }) {
         <Link
           key={user.username}
           href={`/users/${user.username}`}
-          className="rounded-2xl bg-white border shadow-sm p-4 block hover:shadow-md transition"
+          className="user-card rounded-2xl bg-white border p-4 block"
         >
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 shrink-0 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 overflow-hidden flex items-center justify-center text-white font-semibold">

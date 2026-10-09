@@ -64,11 +64,11 @@ export default function SeedCard({
   const tagClass = (category: 'ow' | 'nether' | 'end') => {
     switch (category) {
       case 'ow':
-        return 'rounded-full bg-lime-600 px-2 py-1 text-lime-100'
+        return 'terrain-overworld rounded-full px-2 py-1'
       case 'nether':
-        return 'rounded-full bg-rose-950 px-2 py-1 text-rose-100'
+        return 'terrain-nether rounded-full px-2 py-1'
       case 'end':
-        return 'rounded-full bg-slate-600 px-2 py-1 text-white'
+        return 'terrain-end rounded-full px-2 py-1'
       default:
         return 'rounded-full bg-slate-100 px-2 py-1'
     }
@@ -76,7 +76,7 @@ export default function SeedCard({
 
   return (
     <article
-      className={`min-w-0 max-w-full overflow-hidden rounded-xl border bg-white shadow-lg ${resolvedHref ? 'cursor-pointer' : ''}`}
+      className={`seed-card min-w-0 max-w-full overflow-hidden rounded-xl border bg-white ${resolvedHref ? 'cursor-pointer' : ''}`}
       onClick={() => router.push(resolvedHref)}
       role="button"
       tabIndex={0}

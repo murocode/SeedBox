@@ -1,4 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&family=Fira+Code:wght@400;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap');
+@import '../../tokens.css';
 
 @tailwind base;
 @tailwind components;
@@ -30,4 +31,41 @@ body{
 .btn-outline{ @apply inline-flex items-center justify-center rounded-md px-4 py-2 font-medium border border-slate-200 bg-white text-slate-800 hover:bg-slate-50 }
 
 .site-header{ @apply bg-white border-b shadow-sm }
+
+/* Hallmark · pre-emit critique: P5 H4 E4 S5 R4 V4 · genre: modern-minimal · macrostructure: Exploration Hub / Workbench / Long Document · design-system: design.md · designed-as-app · contrast: pass (40–1) */
+html, body { overflow-x: clip; }
+body {
+  color: var(--color-ink);
+  background: linear-gradient(110deg, var(--color-wash-start), var(--color-wash-end)), var(--color-paper);
+  font-family: var(--font-body);
+}
+::selection { background: var(--color-accent); color: var(--color-accent-ink); }
+:where(a, button, input, select, textarea):focus-visible { outline: 3px solid var(--color-focus); outline-offset: 3px; }
+.site-header { border-color: var(--color-header-rule); box-shadow: 0 1px 0 var(--color-header-shadow); }
+.site-header > div { max-width: 72rem; }
+.site-header a, .site-header button { transition: color var(--dur-short) var(--ease-out), background-color var(--dur-short) var(--ease-out), transform var(--dur-short) var(--ease-out); }
+.site-header a:hover, .site-header button:hover { transform: translateY(-1px); }
+main.container { max-width: 72rem; padding-top: var(--space-xl); padding-bottom: var(--space-2xl); }
+.seedbox-hero { overflow: hidden; border-color: var(--color-rule); box-shadow: var(--shadow-card); background: linear-gradient(135deg, var(--color-paper) 0%, var(--color-paper) 62%, var(--color-paper-2) 100%); }
+.seedbox-kicker { color: var(--color-accent); font-family: var(--font-outlier); letter-spacing: .14em; }
+.seedbox-title { min-width: 0; font-family: var(--font-display); letter-spacing: -.035em; overflow-wrap: anywhere; }
+.page-header-icon { border: var(--rule-hair) solid var(--color-rule); background: var(--color-paper-2); color: var(--color-accent); box-shadow: none; }
+.btn { min-height: 2.75rem; border-radius: var(--radius-input); transition: background-color var(--dur-short) var(--ease-out), border-color var(--dur-short) var(--ease-out), transform var(--dur-short) var(--ease-out), box-shadow var(--dur-short) var(--ease-out); }
+.btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: var(--shadow-button); }
+.btn:active:not(:disabled) { transform: translateY(0); box-shadow: none; }
+.btn:disabled, input:disabled, select:disabled, textarea:disabled { cursor: not-allowed; opacity: .55; }
+.btn-primary { background: var(--color-accent); color: var(--color-accent-ink); }
+.btn-primary:hover:not(:disabled) { background: var(--color-accent-strong); }
+.btn-secondary, .btn-outline { border-color: var(--color-rule); background: var(--color-paper); color: var(--color-ink); }
+.btn-secondary:hover:not(:disabled), .btn-outline:hover:not(:disabled) { border-color: var(--color-rule-2); background: var(--color-paper-2); }
+input, select, textarea { border-color: var(--color-rule) !important; border-radius: var(--radius-input) !important; background-color: var(--color-paper) !important; transition: border-color var(--dur-short) var(--ease-out), box-shadow var(--dur-short) var(--ease-out); }
+input:hover, select:hover, textarea:hover { border-color: var(--color-rule-2) !important; }
+.btn, .site-header a, .site-header button, footer a, footer button { white-space: nowrap; }
+.seed-card, .player-card, .user-card { border-color: var(--color-rule); border-radius: var(--radius-card); box-shadow: var(--shadow-card); transition: transform var(--dur-long) var(--ease-out), box-shadow var(--dur-long) var(--ease-out), border-color var(--dur-short) var(--ease-out); }
+.seed-card:hover, .player-card:hover, .user-card:hover { transform: translateY(-4px); border-color: var(--color-lift-border); box-shadow: var(--shadow-lift); }
+.terrain-overworld { background: var(--color-overworld); color: var(--color-accent-ink); }
+.terrain-nether { background: var(--color-nether); color: var(--color-accent-ink); }
+.terrain-end { background: var(--color-end); color: var(--color-accent-ink); }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: 1ms !important; animation-iteration-count: 1 !important; transition-duration: 150ms !important; scroll-behavior: auto !important; } }
+@media (max-width: 767px) { main.container { padding-top: var(--space-md); } .seedbox-hero { padding: var(--space-md); } }
 

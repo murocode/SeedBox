@@ -81,11 +81,11 @@ export default async function SiteShell({
       <main className="container mx-auto flex-1 overflow-x-clip px-4 py-8">
         {!hideHeader ? (
           layout === 'hero' ? (
-            <section className="mb-8 rounded-2xl border bg-gradient-to-br from-white via-white to-primary-50 p-6 shadow-lg md:p-8">
+            <section className="seedbox-hero mb-8 rounded-2xl border p-6 md:p-8">
               <div className="md:flex md:items-center md:justify-between md:gap-6">
                 <div className="max-w-3xl">
-                  <p className="text-sm font-medium uppercase tracking-[0.2em] text-primary-500">SeedBox</p>
-                  <h1 className="mt-2 text-3xl font-bold text-slate-900 md:text-4xl">{title}</h1>
+                  <p className="seedbox-kicker text-sm font-medium uppercase">SeedBox</p>
+                  <h1 className="seedbox-title mt-2 text-3xl font-bold text-slate-900 md:text-4xl">{title}</h1>
                   {subtitle ? <p className="mt-3 leading-7 text-slate-600">{subtitle}</p> : null}
                   {heroActions ? <div className="mt-4">{heroActions}</div> : null}
                 </div>
