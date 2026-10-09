@@ -64,7 +64,7 @@ export default function HorizontalScroller({ items, itemClassName = 'w-[calc(100
 
       <div
         ref={scrollRef}
-        className="flex gap-4 overflow-x-auto scroll-smooth pb-2 pl-4 pr-4 sm:pl-12 sm:pr-12 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+        className="flex gap-4 overflow-x-auto scroll-smooth py-2 pl-4 pr-4 sm:pl-12 sm:pr-12 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
       >
         {items.map((item, index) => (
           <div key={index} className={itemClassName}>

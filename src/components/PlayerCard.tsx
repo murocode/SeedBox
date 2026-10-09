@@ -12,7 +12,7 @@ function formatTime(seconds?: number | null) {
 
 export default function PlayerCard({ player }: { player: { username: string; avatarUrl?: string | null; pbTime?: number | null } }) {
   return (
-    <article className="bg-white rounded-xl shadow-sm border p-3">
+    <article className="player-card bg-white rounded-xl border p-3">
       <div className="flex items-center gap-3">
         <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 text-white flex items-center justify-center font-semibold text-lg overflow-hidden">
           {player.avatarUrl ? (
